@@ -1,26 +1,52 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Cow {
-    private static String line = "____________________________________________________________\n";
+    private ArrayList<String> taskList = new ArrayList<>();
+    private final String line = "____________________________________________________________\n";
 
     public static void main(String[] args) {
-        String line = "____________________________________________________________\n";
-        String start = line + "Hello! I'm Cow\nWhat can I do for you?\n" + line;
-        String end = line + "Bye. Hope to see you again soon!\n" + line;
-        System.out.println(start);
+        Cow cow = new Cow();
+        cow.start();
+    }
 
+    public void start() {
         Scanner sc = new Scanner(System.in);
+
+        System.out.print(line + "Hello! I'm Cow\nWhat can I do for you?\n" + line);
 
         while (true) {
             String input = sc.nextLine();
 
-            if (input.equalsIgnoreCase("bye")) {
-                System.out.println(end);
-                break;
+            if (input.trim().isEmpty()) {
+                continue;
             }
-            System.out.println(line + input + "\n" + line);
-        }
 
+
+            if (input.equalsIgnoreCase("bye")) { // end chatbot
+                System.out.print(line + "Bye. Hope to see you again soon!\n" + line);
+                break;
+
+            } else if (input.equalsIgnoreCase("list")) { // list all tasks
+                this.listTask();
+
+            } else { // add tasks
+                this.addTask(input);
+            }
+        }
         sc.close();
+    }
+
+    public void addTask(String task) {
+        taskList.add(task);
+        System.out.print(line + "added: " + task + "\n" + line);
+    }
+
+    public void listTask() {
+        System.out.print(line);
+        for (int i = 0; i < taskList.size(); i++) {
+            System.out.println((i + 1) + ". " + taskList.get(i));
+        }
+        System.out.print(line);
     }
 }
