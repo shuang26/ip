@@ -27,7 +27,7 @@ public class Cow {
                         System.out.print(line + "Bye. Hope to see you again soon!\n" + line);
                         return;
                     case "list":
-                        this.listTask();
+                        this.listTask(); // List can even if there is extra words behind
                         break;
                     case "mark":
                         this.markTask(Integer.parseInt(parts[1]) - 1);
@@ -36,24 +36,35 @@ public class Cow {
                         this.unmarkTask(Integer.parseInt(parts[1]) - 1);
                         break;
                     case "todo":
-                        // Can have array out of bounds exception
-                        this.addTodoTask(parts[1]);
+                        if (parts.length == 2) {
+                            this.addTodoTask(parts[1]);
+                        } else {
+                            System.out.print(line + "Missing description for Todo task\n" + line);
+                        }
                         break;
                     case "deadline":
-                        // Can have array out of bounds exception
-                        this.addDeadlineTask(parts[1]);
+                        if (parts.length == 2) {
+                            this.addDeadlineTask(parts[1]);
+                        } else {
+                            System.out.print(line + "Missing description / deadline for Deadline task\n" + line);
+                        }
                         break;
                     case "event":
-                        // Can have array out of bounds exception
-                        this.addEventTask(parts[1]);
+                        if (parts.length == 2) {
+                            this.addEventTask(parts[1]);
+                        } else {
+                            System.out.print(line + "Missing description / from / to for Event task\n" + line);
+                        }
                         break;
                     default:
-                        System.out.print(line + "Sorry, but I don't know what that means.\n" + line);
+                        System.out.print(line + "Sorry, but I don't know what that means.\nPlease try again.\n" + line);
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Error: Invalid number format. Please provide a valid index.");
+                System.out.println("Error: Invalid number format. Please provide a valid index."); // For mark and unmark
             } catch (ArrayIndexOutOfBoundsException e) {
                 System.out.println("Error: Index out of bounds. Please provide a valid task number.");
+            } catch (StringIndexOutOfBoundsException e) {
+                System.out.println("Error: Please provide a valid /from and /to for Event task.");
             }
         }
         sc.close();
