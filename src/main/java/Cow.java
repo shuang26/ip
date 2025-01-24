@@ -48,7 +48,7 @@ public class Cow {
                         this.addEventTask(parts[1]);
                         break;
                     default:
-                        System.out.println(line + "Sorry, but I don't know what that means.\n" + line);
+                        System.out.print(line + "Sorry, but I don't know what that means.\n" + line);
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Error: Invalid number format. Please provide a valid index.");
