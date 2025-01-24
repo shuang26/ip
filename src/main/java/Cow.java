@@ -12,8 +12,8 @@ public class Cow {
 
     public void start() {
         System.out.print(line + "Hello! I'm Cow\nWhat can I do for you?\n" + line);
-
         Scanner sc = new Scanner(System.in);
+
         while (sc.hasNextLine()) {
             String input = sc.nextLine().trim();
             if (input.trim().isEmpty()) continue;
@@ -32,6 +32,7 @@ public class Cow {
                 else continue;
             } else if (action.equals("unmark")) {
                 int index = Integer.parseInt(parts[1]) - 1;
+                // Check if index is a valid value
                 if (this.checkIndex(index)) this.unmarkTask(index);
                 else continue;
 
@@ -54,7 +55,7 @@ public class Cow {
 
         for (int i = 0; i < taskList.size(); i++) {
             Task tmp = taskList.get(i);
-            System.out.println((i + 1) + ".[" + tmp.getStatusIcon() + "] " + tmp);
+            System.out.println((i + 1) + "." + tmp);
         }
         System.out.print(line);
     }
@@ -63,14 +64,14 @@ public class Cow {
         System.out.print(line + "Nice! I've marked this task as done:\n");
         Task tmp = taskList.get(index);
         tmp.isDone = true;
-        System.out.print("[" + tmp.getStatusIcon() + "] " + tmp + "\n" + line);
+        System.out.print(tmp + "\n" + line);
     }
 
     public void unmarkTask(int index) {
         System.out.print(line + "OK, I've marked this task as not done yet:\n");
         Task tmp = taskList.get(index);
         tmp.isDone = false;
-        System.out.print("[" + tmp.getStatusIcon() + "] " + tmp + "\n" + line);
+        System.out.print(tmp + "\n" + line);
     }
 
     private boolean checkIndex(int index) {
