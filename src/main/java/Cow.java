@@ -56,13 +56,20 @@ public class Cow {
                             System.out.print(line + "Missing description / from / to for Event task\n" + line);
                         }
                         break;
+                    case "delete":
+                        if (parts.length == 2) {
+                            this.deleteTask(Integer.parseInt(parts[1]) - 1);
+                        } else {
+                            System.out.print(line + "Missing index for Delete task\n" + line);
+                        }
+                        break;
                     default:
                         System.out.print(line + "Sorry, but I don't know what that means.\nPlease try again.\n" + line);
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Error: Invalid number format. Please provide a valid index."); // For mark and unmark
+                System.out.println("Please provide a valid index. (For mark / unmark / delete requests)"); // For mark and unmark
             } catch (ArrayIndexOutOfBoundsException e) {
-                System.out.println("Error: Index out of bounds. Please provide a valid task number.");
+                System.out.println("Error: Insufficient arguments. Please provide a proper request.");
             } catch (StringIndexOutOfBoundsException e) {
                 System.out.println("Error: Please provide a valid /from and /to for Event task.");
             }
@@ -123,6 +130,17 @@ public class Cow {
         System.out.print(line);
     }
 
+    public void deleteTask(int index) {
+        if (this.checkIndex(index)) {
+            System.out.print(line + "Noted. I've removed this task:\n");
+            Task tmp = taskList.remove(index);
+            System.out.print(tmp + "\n");
+            System.out.print("Now you have " + taskList.size() + " tasks in the list.\n" + line);
+        } else {
+            System.out.println("Error: index is out of bounds for Delete request");
+        }
+    }
+
     public void markTask(int index) {
         if (this.checkIndex(index)) {
             System.out.print(line + "Nice! I've marked this task as done:\n");
@@ -130,7 +148,7 @@ public class Cow {
             tmp.markDone();
             System.out.print(tmp + "\n" + line);
         } else {
-            System.out.println("Error: index is out of bounds");
+            System.out.println("Error: index is out of for Mark request");
         }
     }
 
@@ -141,7 +159,7 @@ public class Cow {
             tmp.unmarkDone();
             System.out.print(tmp + "\n" + line);
         } else {
-            System.out.println("Error: index is out of bounds");
+            System.out.println("Error: index is out of bounds for Unmark request");
         }
     }
 
