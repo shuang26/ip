@@ -6,6 +6,10 @@ public class Deadline extends Task {
         this.deadlineDate = deadlineDate;
     }
 
+    public String getFormat() {
+        return "D | " + super.getFormat() + " | " + deadlineDate;
+    }
+
     @Override
     public String toString() {
         return "[D]" + super.toString() + " (by: " + deadlineDate + ")";

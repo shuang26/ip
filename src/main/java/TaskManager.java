@@ -1,12 +1,10 @@
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class TaskManager {
-    private ArrayList<Task> taskList;
+    private final ArrayList<Task> taskList;
     private final String line = "____________________________________________________________\n";
     private final String FILE_PATH = "./data/cow.txt";
 
@@ -27,6 +25,7 @@ public class TaskManager {
             switch (request) {
                 case "bye":
                     printWithLine("Bye. Hope to see you again soon!");
+                    writeToFile();
                     return true;
                 case "list":
                     this.listAllTask(); // List can even if there is extra words behind
@@ -59,7 +58,7 @@ public class TaskManager {
     }
 
     public void addNewTask(String taskType, boolean isDone, String input) {
-        Task task = null;
+        Task task;
 
         switch (taskType) {
             case "todo":
@@ -120,6 +119,12 @@ public class TaskManager {
 
     public void listAllTask() {
         System.out.print(line);
+        if (taskList.isEmpty()) {
+            System.out.println("There is no task in your list. Please add some to see the list.");
+            System.out.println(line);
+            return;
+        }
+
         System.out.println("Here are the tasks in your list:");
 
         for (int i = 0; i < taskList.size(); i++) {
@@ -130,37 +135,37 @@ public class TaskManager {
     }
 
     public void deleteTask(String index) {
+        int i = Integer.parseInt(index) - 1;
+
         if (taskList.isEmpty()) {
             printWithLine("Error: Cannot delete from an empty list.");
             return;
+        } else if (i < 0 || i >= taskList.size()) {
+            printWithLine("Error: index is out of bounds for delete request.");
+            return;
         }
 
-        int i = Integer.parseInt(index);
-        if (this.checkIndex(i)) {
-            System.out.print(line + "Noted. I've removed this task:\n");
-            Task tmp = taskList.remove(i);
-            System.out.print(tmp + "\n");
-            System.out.print("Now you have " + taskList.size() + " tasks in the list.\n" + line);
-        } else {
-            printWithLine("Error: index is out of bounds for delete request.");
-        }
+        System.out.print(line + "Noted. I've removed this task:\n");
+        Task tmp = taskList.remove(i);
+        System.out.print(tmp + "\n");
+        System.out.print("Now you have " + taskList.size() + " tasks in the list.\n" + line);
+
+
     }
 
     public void handleMarkUnmark(String request, String index) throws NumberFormatException {
+        int i = Integer.parseInt(index) - 1;
+
         if (taskList.isEmpty()) {
             printWithLine("Error: Cannot " + request + " an empty list.");
             return;
-        }
-        int i = Integer.parseInt(index) - 1;
-        if (this.checkIndex(i)) {
-            if (request.equals("mark")) {
-                this.markTask(i);
-            } else {
-                this.unmarkTask(i);
-            }
-        } else {
+        } else if (i < 0 || i >= taskList.size()) {
             printWithLine("Error: index is out of bounds for " + request + " request.");
+            return;
         }
+
+        if (request.equals("mark")) this.markTask(i);
+        else this.unmarkTask(i);
     }
 
     private void markTask(int index) {
@@ -175,11 +180,6 @@ public class TaskManager {
         Task tmp = taskList.get(index);
         tmp.unmarkDone();
         System.out.print(tmp + "\n" + line);
-    }
-
-    // Returns true for valid index only, Return false if taskList is empty or index is out of range
-    private boolean checkIndex(int index) {
-        return index >= 0 && index < taskList.size();
     }
 
     public void loadTaskFromFile() {
@@ -231,6 +231,22 @@ public class TaskManager {
             }
         }
     }
+
+    public void writeToFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
+            boolean isFileEmpty = new java.io.File(FILE_PATH).length() == 0;
+
+            for (Task task : taskList) {
+                if (!isFileEmpty) writer.newLine();
+
+                writer.write(task.getFormat());
+                isFileEmpty = false; // Only add new line on the first write
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to the file.");
+        }
+    }
+
 
     private void printWithLine(String message) {
         System.out.print(line + message + "\n" + line);

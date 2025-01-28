@@ -8,6 +8,11 @@ public class Event extends Task {
         this.toDate = toDate;
     }
 
+    public String getFormat() {
+        return "E | " + super.getFormat() + " | " + fromDate + " | " + toDate;
+    }
+
+
     @Override
     public String toString() {
         return "[E]" + super.toString() + " (from: " + fromDate + " to: " + toDate + ")";
