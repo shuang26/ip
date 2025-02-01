@@ -2,10 +2,10 @@ import java.util.Scanner;
 
 public class Cow {
     private TaskManager taskManager;
+    private Ui ui;
 
-    public static void main(String[] args) {
-        Cow cow = new Cow();
-        cow.start();
+    public Cow() {
+        this.ui = new Ui();
     }
 
     public void start() {
@@ -13,7 +13,7 @@ public class Cow {
         this.taskManager = new TaskManager();
         taskManager.start();
 
-        printStart();
+        ui.showWelcome();
         Scanner sc = new Scanner(System.in);
 
         while (sc.hasNextLine()) {
@@ -25,8 +25,8 @@ public class Cow {
         sc.close();
     }
 
-    public void printStart() {
-        String line = "____________________________________________________________\n";
-        System.out.print(line + "Hello! I'm Cow\nWhat can I do for you?\n" + line);
+    public static void main(String[] args) {
+        Cow cow = new Cow();
+        cow.start();
     }
 }
