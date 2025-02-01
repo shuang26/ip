@@ -83,12 +83,14 @@ public class Storage {
     }
 
 
-    public void saveTasksToFile(ArrayList<Task> tasks) {
+    public void saveTasksToFile(TaskList tasks) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             boolean isFileEmpty = new java.io.File(filePath).length() == 0;
 
-            for (Task task : tasks) {
-                if (!isFileEmpty) writer.newLine();
+            for (Task task : tasks.getAllTasks()) {
+                if (!isFileEmpty) {
+                    writer.newLine();
+                }
 
                 writer.write(task.getFormat());
                 isFileEmpty = false; // Only add new line on the first write

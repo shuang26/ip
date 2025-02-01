@@ -201,4 +201,16 @@ public class TaskList {
 
         return LocalDateTime.of(date, time);
     }
+
+    public int size() {
+        return tasks.size();
+    }
+
+    public boolean isEmpty() {
+        return tasks.isEmpty();
+    }
+
+    public ArrayList<Task> getAllTasks() {
+        return new ArrayList<>(this.tasks);
+    }
 }
