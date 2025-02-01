@@ -1,3 +1,5 @@
+package ui;
+
 public class Ui {
     private final String line = "____________________________________________________________\n";
 

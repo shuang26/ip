@@ -1,3 +1,5 @@
+package task;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
@@ -81,10 +83,10 @@ public class TaskManager {
                     LocalDateTime dateTime = parseDateTime(parts[1].trim());
                     task = addDeadlineTask(parts[0].trim(), isDone, dateTime);
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    printWithLine("Error: Please provide task description or a deadline for Deadline task.");
+                    printWithLine("Error: Please provide task description or a deadline for task.Deadline task.");
                     return;
                 } catch (DateTimeParseException e) {
-                    printWithLine("Error: Please provide a valid deadline for Deadline task.");
+                    printWithLine("Error: Please provide a valid deadline for task.Deadline task.");
                     return;
                 }
                 break;
@@ -94,7 +96,7 @@ public class TaskManager {
                 int toIndex = input.indexOf("/to");
 
                 if (fromIndex == -1 || toIndex == -1) {
-                    printWithLine("Error: Please provide /from data or /to date for Event task");
+                    printWithLine("Error: Please provide /from data or /to date for task.Event task");
                     return;
                 }
                 String description = input.substring(0, fromIndex).trim();
