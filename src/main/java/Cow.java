@@ -1,32 +1,37 @@
 import java.util.Scanner;
 
 public class Cow {
-    private TaskManager taskManager;
+    private Storage storage;
+    private TaskList tasks;
+    private Ui ui;
 
-    public static void main(String[] args) {
-        Cow cow = new Cow();
-        cow.start();
+    public Cow(String filePath) {
+        this.ui = new Ui();
+        this.storage = new Storage(filePath);
+        this.tasks = storage.loadTasksFromFile();
     }
 
-    public void start() {
-        // Initialise Task Manager and Load task from saved file / create new file
-        this.taskManager = new TaskManager();
-        taskManager.start();
-
-        printStart();
+    public void run() {
+        ui.showWelcome();
         Scanner sc = new Scanner(System.in);
+
+        // boolean isExit = false;
 
         while (sc.hasNextLine()) {
             String input = sc.nextLine().trim();
-
-            if (input.isEmpty()) continue;
-            if (taskManager.handleInput(input)) break;
+            if (input.isEmpty()) {
+                continue;
+            }
+            if (tasks.handleInput(input)) {
+                break;
+            }
         }
+
+        storage.saveTasksToFile(tasks);
         sc.close();
     }
 
-    public void printStart() {
-        String line = "____________________________________________________________\n";
-        System.out.print(line + "Hello! I'm Cow\nWhat can I do for you?\n" + line);
+    public static void main(String[] args) {
+        new Cow("data/cow.txt").run();
     }
 }

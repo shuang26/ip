@@ -22,6 +22,10 @@ public class TaskManager {
         taskList = new ArrayList<>();
     }
 
+    public TaskManager(ArrayList<Task> taskList) {
+        this.taskList = taskList;
+    }
+
     public void start() {
         // Load tasks from saved file
         this.loadTaskFromFile();
