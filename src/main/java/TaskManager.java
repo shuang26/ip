@@ -1,4 +1,14 @@
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.FileWriter;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -23,31 +33,28 @@ public class TaskManager {
 
         try {
             switch (request) {
-                case "bye":
-                    printWithLine("Bye. Hope to see you again soon!");
-                    writeToFile();
-                    return true;
-                case "list":
-                    this.listAllTask(); // List can even if there is extra words behind
+            case "bye":
+                printWithLine("Bye. Hope to see you again soon!");
+                writeToFile();
+                return true;
+            case "list":
+                this.listAllTask(); // List can even if there is extra words behind
+                break;
+            case "unmark": case "mark":
+                if (parts.length != 2) {
+                    printWithLine("Please provide an index for mark / unmark request.");
                     break;
-                case "unmark":
-                case "mark":
-                    if (parts.length != 2) {
-                        printWithLine("Please provide an index for mark / unmark request.");
-                        break;
-                    }
-                    this.handleMarkUnmark(request, parts[1]);
-                    break;
-                case "todo":
-                case "deadline":
-                case "event":
-                    this.addNewTask(request, false, parts[1]);
-                    break;
-                case "delete":
-                    this.deleteTask(parts[1]);
-                    break;
-                default:
-                    printWithLine("Sorry, but I don't know what that means.\nPlease try again.");
+                }
+                this.handleMarkUnmark(request, parts[1]);
+                break;
+            case "todo": case "deadline": case "event":
+                this.addNewTask(request, false, parts[1]);
+                break;
+            case "delete":
+                this.deleteTask(parts[1]);
+                break;
+            default:
+                printWithLine("Sorry, but I don't know what that means.\nPlease try again.");
             }
         } catch (NumberFormatException e) {
             printWithLine("Please provide a valid index. (For mark / unmark / delete requests)");
@@ -67,9 +74,13 @@ public class TaskManager {
             case "deadline":
                 try {
                     String[] parts = input.split("/by", 2);
-                    task = addDeadlineTask(parts[0].trim(), isDone, parts[1].trim());
+                    LocalDateTime dateTime = parseDateTime(parts[1].trim());
+                    task = addDeadlineTask(parts[0].trim(), isDone, dateTime);
                 } catch (ArrayIndexOutOfBoundsException e) {
                     printWithLine("Error: Please provide task description or a deadline for Deadline task.");
+                    return;
+                } catch (DateTimeParseException e) {
+                    printWithLine("Error: Please provide a valid deadline for Deadline task.");
                     return;
                 }
                 break;
@@ -105,10 +116,10 @@ public class TaskManager {
         return tmp;
     }
 
-    private Deadline addDeadlineTask(String description, boolean isDone, String deadline) {
-            Deadline tmp = new Deadline(description, isDone, deadline);
-            taskList.add(tmp);
-            return tmp;
+    private Deadline addDeadlineTask(String description, boolean isDone, LocalDateTime dateTime) {
+        Deadline tmp = new Deadline(description, isDone, dateTime);
+        taskList.add(tmp);
+        return tmp;
     }
 
     private Event addEventTask(String description, boolean isDone, String fromDate, String toDate) {
@@ -141,7 +152,7 @@ public class TaskManager {
             printWithLine("Error: Cannot delete from an empty list.");
             return;
         } else if (i < 0 || i >= taskList.size()) {
-            printWithLine("Error: index is out of bounds for delete request.");
+            printWithLine("Error: Index must be between 1 and " + taskList.size() + " for delete request.");
             return;
         }
 
@@ -149,8 +160,6 @@ public class TaskManager {
         Task tmp = taskList.remove(i);
         System.out.print(tmp + "\n");
         System.out.print("Now you have " + taskList.size() + " tasks in the list.\n" + line);
-
-
     }
 
     public void handleMarkUnmark(String request, String index) throws NumberFormatException {
@@ -199,15 +208,15 @@ public class TaskManager {
                         String taskType = parts[0].trim();
                         boolean isDone = parts[1].trim().equals("1");
                         switch (taskType) {
-                            case "T":
-                                this.addTodoTask(parts[2], isDone);
-                                break;
-                            case "D":
-                                this.addDeadlineTask(parts[2], isDone, parts[3]);
-                                break;
-                            case "E":
-                                this.addEventTask(parts[2], isDone, parts[3], parts[4]);
-                                break;
+                        case "T":
+                            this.addTodoTask(parts[2], isDone);
+                            break;
+                        case "D":
+                            this.addDeadlineTask(parts[2], isDone, parseDateTime(parts[3]));
+                            break;
+                        case "E":
+                            this.addEventTask(parts[2], isDone, parts[3], parts[4]);
+                            break;
                         }
                     } catch (IndexOutOfBoundsException e) {
                         System.out.println("Error: missing information for the task");
@@ -224,8 +233,8 @@ public class TaskManager {
                 if (parentDir != null && !parentDir.exists()) {
                     parentDir.mkdirs();
                 }
-                // Create the empty file
-                file.createNewFile();
+
+                file.createNewFile(); // Create the empty file
             } catch (IOException e) {
                 System.err.println("An error occurred while creating the file: " + e.getMessage());
             }
@@ -247,9 +256,25 @@ public class TaskManager {
         }
     }
 
-
     private void printWithLine(String message) {
         System.out.print(line + message + "\n" + line);
     }
 
+    public LocalDateTime parseDateTime(String input) throws DateTimeParseException {
+        input = input.replaceAll("[-/]", " "); // Normalize separators
+        String[] parts = input.split("\\s+");
+
+        if (parts.length < 4) {
+            throw new DateTimeParseException("Invalid format", input, 0);
+        }
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d M yyyy");
+        LocalDate date = LocalDate.parse(parts[0] + " " + parts[1] + " " + parts[2], dateFormatter);
+
+        // Parse time (supports "HHmm" format)
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmm");
+        LocalTime time = LocalTime.parse(parts[3], timeFormatter);
+
+        return LocalDateTime.of(date, time);
+    }
 }

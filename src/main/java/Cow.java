@@ -9,11 +9,10 @@ public class Cow {
     }
 
     public void start() {
-        // Initialise Task Manager and Load any task from saved file / create new file
+        // Initialise Task Manager and Load task from saved file / create new file
         this.taskManager = new TaskManager();
         taskManager.start();
 
-        // Greet user and start reading user input
         printStart();
         Scanner sc = new Scanner(System.in);
 
