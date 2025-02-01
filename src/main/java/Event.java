@@ -12,7 +12,6 @@ public class Event extends Task {
         return "E | " + super.getFormat() + " | " + fromDate + " | " + toDate;
     }
 
-
     @Override
     public String toString() {
         return "[E]" + super.toString() + " (from: " + fromDate + " to: " + toDate + ")";
