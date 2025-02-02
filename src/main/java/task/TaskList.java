@@ -1,10 +1,10 @@
 package task;
 
-import java.time.LocalDate;
+import parser.Parser;
+
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
 import java.util.ArrayList;
 
 public class TaskList {
@@ -20,8 +20,9 @@ public class TaskList {
     }
 
     public boolean handleInput(String input) {
-        String[] parts = input.split(" ", 2); // Split into at most 2 parts for now
-        String request = parts[0].trim().toLowerCase();
+        Parser.ParsedCommand parsed = Parser.parse(input);
+        String request = parsed.command;
+        String args = parsed.arguments;
 
         try {
             switch (request) {
@@ -29,28 +30,32 @@ public class TaskList {
                 printWithLine("Bye. Hope to see you again soon!");
                 return true;
             case "list":
-                this.listAllTask(); // List can even if there is extra words behind
+                this.listAllTask();
                 break;
             case "unmark": case "mark":
-                if (parts.length != 2) {
-                    printWithLine("Please provide an index for mark / unmark request.");
+                if (args.isEmpty()) {
+                    printWithLine("Please provide an index for mark/unmark.");
                     break;
                 }
-                this.handleMarkUnmark(request, parts[1]);
+                this.handleMarkUnmark(request, args);
                 break;
             case "todo": case "deadline": case "event":
-                this.addNewTask(request, false, parts[1]);
+                this.addNewTask(request, false, args);
                 break;
             case "delete":
-                this.deleteTask(parts[1]);
+                if (args.isEmpty()) {
+                    printWithLine("Please provide an index for delete.");
+                    break;
+                }
+                this.deleteTask(args);
                 break;
             default:
-                printWithLine("Sorry, but I don't know what that means.\nPlease try again.");
+                printWithLine("Sorry, I don't know what that means.");
             }
         } catch (NumberFormatException e) {
-            printWithLine("Please provide a valid index. (For mark / unmark / delete requests)");
+            printWithLine("Please provide a valid index.");
         } catch (ArrayIndexOutOfBoundsException e) {
-            printWithLine("Error: Missing information. Please provide a proper request.");
+            printWithLine("Error: Missing information.");
         }
         return false;
     }
@@ -65,7 +70,7 @@ public class TaskList {
         case "deadline":
             try {
                 String[] parts = input.split("/by", 2);
-                LocalDateTime dateTime = parseDateTime(parts[1].trim());
+                LocalDateTime dateTime = Parser.parseDateTime(parts[1].trim());
                 task = addDeadlineTask(parts[0].trim(), isDone, dateTime);
             } catch (ArrayIndexOutOfBoundsException e) {
                 printWithLine("Error: Please provide task description or a deadline for task.Deadline task.");
@@ -184,24 +189,6 @@ public class TaskList {
 
     private void printWithLine(String message) {
         System.out.print(line + message + "\n" + line);
-    }
-
-    public LocalDateTime parseDateTime(String input) throws DateTimeParseException {
-        input = input.replaceAll("[-/]", " "); // Normalize separators
-        String[] parts = input.split("\\s+");
-
-        if (parts.length < 4) {
-            throw new DateTimeParseException("Invalid format", input, 0);
-        }
-
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d M yyyy");
-        LocalDate date = LocalDate.parse(parts[0] + " " + parts[1] + " " + parts[2], dateFormatter);
-
-        // Parse time (supports "HHmm" format)
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmm");
-        LocalTime time = LocalTime.parse(parts[3], timeFormatter);
-
-        return LocalDateTime.of(date, time);
     }
 
     public int size() {

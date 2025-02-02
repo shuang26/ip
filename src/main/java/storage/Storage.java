@@ -1,5 +1,6 @@
 package storage;
 
+import parser.Parser;
 import task.Task;
 import task.TaskList;
 
@@ -8,12 +9,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.FileWriter;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 import java.util.Scanner;
 
@@ -51,7 +46,7 @@ public class Storage {
                                 tasks.addTodoTask(parts[2], isDone);
                                 break;
                             case "D":
-                                tasks.addDeadlineTask(parts[2], isDone, parseDateTime(parts[3]));
+                                tasks.addDeadlineTask(parts[2], isDone, Parser.parseDateTime(parts[3]));
                                 break;
                             case "E":
                                 tasks.addEventTask(parts[2], isDone, parts[3], parts[4]);
@@ -102,23 +97,5 @@ public class Storage {
         } catch (IOException e) {
             System.err.println("Error writing file: " + e.getMessage());
         }
-    }
-
-    public LocalDateTime parseDateTime(String input) throws DateTimeParseException {
-        input = input.replaceAll("[-/]", " "); // Normalize separators
-        String[] parts = input.split("\\s+");
-
-        if (parts.length < 4) {
-            throw new DateTimeParseException("Invalid format", input, 0);
-        }
-
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d M yyyy");
-        LocalDate date = LocalDate.parse(parts[0] + " " + parts[1] + " " + parts[2], dateFormatter);
-
-        // Parse time (supports "HHmm" format)
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmm");
-        LocalTime time = LocalTime.parse(parts[3], timeFormatter);
-
-        return LocalDateTime.of(date, time);
     }
 }
