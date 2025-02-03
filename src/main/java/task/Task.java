@@ -21,6 +21,10 @@ public abstract class Task {
         this.isDone = false;
     }
 
+    public boolean isDone() {
+        return this.isDone;
+    }
+
     public String getFormat() {
         return (isDone ? "1" : "0") + " | " + description;
     }
