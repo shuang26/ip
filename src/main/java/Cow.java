@@ -34,7 +34,6 @@ public class Cow {
         Scanner sc = new Scanner(System.in);
 
         // boolean isExit = false;
-
         while (sc.hasNextLine()) {
             String input = sc.nextLine().trim();
             if (input.isEmpty()) {

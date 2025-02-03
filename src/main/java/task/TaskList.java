@@ -66,6 +66,12 @@ public class TaskList {
                 }
                 this.deleteTask(args);
                 break;
+            case "find":
+                if (args.isEmpty()) {
+                    printWithLine("Cannot search with an empty string");
+                }
+                this.findTask(args);
+                break;
             default:
                 printWithLine("Sorry, I don't know what that means.");
             }
@@ -258,6 +264,31 @@ public class TaskList {
         Task tmp = tasks.get(index);
         tmp.unmarkDone();
         System.out.print(tmp + "\n" + line);
+    }
+
+    public void findTask(String description) {
+        if (tasks.isEmpty()) {
+            printWithLine("TaskList is empty");
+            return;
+        }
+
+        ArrayList<String> tmp = new ArrayList<>();
+        for (int i = 0; i < tasks.size(); i++) {
+            Task t = tasks.get(i);
+
+            if (t.getDescription().toLowerCase().contains(description.toLowerCase())) {
+                tmp.add((i + 1) + "." + t.toString());
+            }
+        }
+        if (tmp.isEmpty()) {
+            printWithLine("No matching task is found in the Task List.");
+        } else {
+            System.out.print(line + "Here are the matching tasks in your list:\n");
+            for (String s : tmp) {
+                System.out.println(s);
+            }
+            System.out.print(line);
+        }
     }
 
     private void printWithLine(String message) {
