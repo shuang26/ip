@@ -7,18 +7,35 @@ import java.time.format.DateTimeParseException;
 
 import java.util.ArrayList;
 
+/**
+ * Manages a list of tasks and provides methods to handle user input.
+ */
 public class TaskList {
     private final ArrayList<Task> tasks;
     private final String line = "____________________________________________________________\n";
 
+    /**
+     * Constructs an empty TaskList.
+     */
     public TaskList() {
         this.tasks = new ArrayList<>();
     }
 
+    /**
+     * Constructs a TaskList with the given list of tasks.
+     *
+     * @param tasks The list of tasks to initialize the TaskList.
+     */
     public TaskList(ArrayList<Task> tasks) {
         this.tasks = tasks;
     }
 
+    /**
+     * Handles user input and executes corresponding commands.
+     *
+     * @param input The user input command.
+     * @return {@code true} if the "bye" command is issued, otherwise {@code false}.
+     */
     public boolean handleInput(String input) {
         Parser.ParsedCommand parsed = Parser.parse(input);
         String request = parsed.command;
@@ -60,18 +77,25 @@ public class TaskList {
         return false;
     }
 
+    /**
+     * Adds a new task to the task list based on the provided type and input.
+     *
+     * @param taskType The type of task (todo, deadline, event).
+     * @param isDone   The completion status of the task.
+     * @param input    The user input describing the task.
+     */
     public void addNewTask(String taskType, boolean isDone, String input) {
         Task task;
 
         switch (taskType) {
         case "todo":
-            task = addTodoTask(input, isDone);
+            task = createTodo(input, isDone);
             break;
         case "deadline":
             try {
                 String[] parts = input.split("/by", 2);
                 LocalDateTime dateTime = Parser.parseDateTime(parts[1].trim());
-                task = addDeadlineTask(parts[0].trim(), isDone, dateTime);
+                task = createDeadline(parts[0].trim(), isDone, dateTime);
             } catch (ArrayIndexOutOfBoundsException e) {
                 printWithLine("Error: Please provide task description or a deadline for task.Deadline task.");
                 return;
@@ -93,7 +117,7 @@ public class TaskList {
             String fromDate = input.substring(fromIndex + 6, toIndex).trim(); // +6 to skip "/from "
             String toDate = input.substring(toIndex + 4).trim(); // +4 to skip "/to "
 
-            task = addEventTask(description, isDone, fromDate, toDate);
+            task = createEvent(description, isDone, fromDate, toDate);
             break;
         default:
             printWithLine("Error: Unknown task type. Please provide a valid task type (todo, deadline, event).");
@@ -106,24 +130,51 @@ public class TaskList {
         System.out.print("Now you have " + tasks.size() + " tasks in the list.\n" + line);
     }
 
-    public Todo addTodoTask(String description, boolean isDone) {
+    /**
+     * Creates a new todo task.
+     *
+     * @param description The description of the task.
+     * @param isDone The completion status of the task.
+     * @return The created Todo task.
+     */
+    public Todo createTodo(String description, boolean isDone) {
         Todo tmp = new Todo(description, isDone);
         tasks.add(tmp);
         return tmp;
     }
 
-    public Deadline addDeadlineTask(String description, boolean isDone, LocalDateTime dateTime) {
+    /**
+     * Adds a new deadline task to the list.
+     *
+     * @param description The description of the task.
+     * @param isDone The completion status of the task.
+     * @param dateTime The deadline of the task.
+     * @return The created Deadline task.
+     */
+    public Deadline createDeadline(String description, boolean isDone, LocalDateTime dateTime) {
         Deadline tmp = new Deadline(description, isDone, dateTime);
         tasks.add(tmp);
         return tmp;
     }
 
-    public Event addEventTask(String description, boolean isDone, String fromDate, String toDate) {
+    /**
+     * Create a new event task.
+     *
+     * @param description The description of the task.
+     * @param isDone The completion status of the task.
+     * @param fromDate The start date of the event.
+     * @param toDate The end date of the event.
+     * @return The created Event task.
+     */
+    public Event createEvent(String description, boolean isDone, String fromDate, String toDate) {
         Event tmp = new Event(description, isDone, fromDate, toDate);
         tasks.add(tmp);
         return tmp;
     }
 
+    /**
+     * Prints out all the tasks in the task list.
+     */
     public void listAllTask() {
         System.out.print(line);
         if (tasks.isEmpty()) {
@@ -141,6 +192,11 @@ public class TaskList {
         System.out.print(line);
     }
 
+    /**
+     * Deletes a task from the list by index.
+     *
+     * @param index The index of the task to delete.
+     */
     public void deleteTask(String index) {
         int i = Integer.parseInt(index) - 1;
 
@@ -158,6 +214,13 @@ public class TaskList {
         System.out.print("Now you have " + tasks.size() + " tasks in the list.\n" + line);
     }
 
+    /**
+     * Handles marking or unmarking a task based on the provided request and index.
+     *
+     * @param request The action to perform, either "mark" or "unmark".
+     * @param index   The index of the task to be marked or unmarked (1-based index).
+     * @throws NumberFormatException If the provided index is not a valid number.
+     */
     public void handleMarkUnmark(String request, String index) throws NumberFormatException {
         int i = Integer.parseInt(index) - 1;
 
@@ -173,6 +236,11 @@ public class TaskList {
         else this.unmarkTask(i);
     }
 
+    /**
+     * Marks the task at the specified index as done.
+     *
+     * @param index The index of the task to mark as done (0-based index).
+     */
     private void markTask(int index) {
         System.out.print(line + "Nice! I've marked this task as done:\n");
         Task tmp = tasks.get(index);
@@ -180,6 +248,11 @@ public class TaskList {
         System.out.print(tmp + "\n" + line);
     }
 
+    /**
+     * Unmarks the task at the specified index as done.
+     *
+     * @param index The index of the task to mark as done (0-based index).
+     */
     private void unmarkTask(int index) {
         System.out.print(line + "OK, I've marked this task as not done yet:\n");
         Task tmp = tasks.get(index);
@@ -191,14 +264,29 @@ public class TaskList {
         System.out.print(line + message + "\n" + line);
     }
 
+    /**
+     * Returns the number of tasks in the task list.
+     *
+     * @return The size of the task list.
+     */
     public int size() {
         return tasks.size();
     }
 
+    /**
+     * Checks if the task list is empty.
+     *
+     * @return {@code true} if the task list is empty, {@code false} otherwise.
+     */
     public boolean isEmpty() {
         return tasks.isEmpty();
     }
 
+    /**
+     * Returns a copy of all tasks in the task list.
+     *
+     * @return A new {@code ArrayList} containing all tasks.
+     */
     public ArrayList<Task> getAllTasks() {
         return new ArrayList<>(this.tasks);
     }
