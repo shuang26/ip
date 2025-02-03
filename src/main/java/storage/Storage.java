@@ -12,13 +12,27 @@ import java.io.FileWriter;
 
 import java.util.Scanner;
 
+/**
+ * Handles loading and saving tasks to a file for storage.
+ */
 public class Storage {
     private final String filePath;
 
+    /**
+     * Constructs a Storage instance with the specified file path.
+     *
+     * @param filePath The path of the file used for storing tasks.
+     */
     public Storage(String filePath) {
         this.filePath = filePath;
     }
 
+    /**
+     * Loads tasks from the specified file and returns them as a TaskList.
+     * If the file does not exist, it creates an empty file.
+     *
+     * @return A TaskList containing tasks loaded from the file.
+     */
     public TaskList loadTasksFromFile() {
         TaskList tasks = new TaskList();
 
@@ -43,13 +57,13 @@ public class Storage {
                             boolean isDone = parts[1].trim().equals("1");
                             switch (taskType) {
                             case "T":
-                                tasks.addTodoTask(parts[2], isDone);
+                                tasks.createTodo(parts[2], isDone);
                                 break;
                             case "D":
-                                tasks.addDeadlineTask(parts[2], isDone, Parser.parseDateTime(parts[3]));
+                                tasks.createDeadline(parts[2], isDone, Parser.parseDateTime(parts[3]));
                                 break;
                             case "E":
-                                tasks.addEventTask(parts[2], isDone, parts[3], parts[4]);
+                                tasks.createEvent(parts[2], isDone, parts[3], parts[4]);
                                 break;
                             }
                         } catch (IndexOutOfBoundsException e) {
@@ -68,6 +82,12 @@ public class Storage {
         return tasks;
     }
 
+    /**
+     * Creates an empty file at the specified location.
+     * Ensures that the parent directory exists before creating the file.
+     *
+     * @param file The file to be created.
+     */
     private void createEmptyFile(File file) {
         try {
             // Ensure the parent directory exists
@@ -81,7 +101,11 @@ public class Storage {
         }
     }
 
-
+    /**
+     * Saves the current list of tasks to the file.
+     *
+     * @param tasks The TaskList to be saved.
+     */
     public void saveTasksToFile(TaskList tasks) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             boolean isFileEmpty = new java.io.File(filePath).length() == 0;

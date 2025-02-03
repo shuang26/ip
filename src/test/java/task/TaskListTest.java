@@ -20,30 +20,30 @@ public class TaskListTest {
     }
 
     @Test
-    void testAddTodoTask() {
-        Todo todo = taskList.addTodoTask("Read book", false);
+    void testCreateTodo() {
+        Todo todo = taskList.createTodo("Read book", false);
         assertEquals(1, taskList.size());
         assertEquals("[T][ ] Read book", todo.toString());
     }
 
     @Test
-    void testAddDeadlineTask() {
+    void testCreateDeadline() {
         LocalDateTime tmp = LocalDateTime.of(2025, 2, 10, 12, 0);
-        Deadline deadline = taskList.addDeadlineTask("Submit assignment", false, tmp);
+        Deadline deadline = taskList.createDeadline("Submit assignment", false, tmp);
         assertEquals(1, taskList.size());
         assertEquals("[D][ ] Submit assignment (by: 10 Feb 2025, 12:00pm)", deadline.toString());
     }
 
     @Test
-    void testAddEventTask() {
-        Event event = taskList.addEventTask("Project meeting", false, "Monday 10AM", "Monday 12PM");
+    void testCreateEvent() {
+        Event event = taskList.createEvent("Project meeting", false, "Monday 10AM", "Monday 12PM");
         assertEquals(1, taskList.size());
         assertEquals("[E][ ] Project meeting (from: Monday 10AM to: Monday 12PM)", event.toString());
     }
 
     @Test
     void testDeleteTask() {
-        taskList.addTodoTask("Exercise", false);
+        taskList.createTodo("Exercise", false);
         taskList.deleteTask("1");
         assertEquals(0, taskList.size());
     }
@@ -56,7 +56,7 @@ public class TaskListTest {
 
     @Test
     void testHandleMarkUnmark() {
-        taskList.addTodoTask("Do laundry", false);
+        taskList.createTodo("Do laundry", false);
         taskList.handleMarkUnmark("mark", "1");
         assertTrue(taskList.getAllTasks().get(0).isDone());
 
