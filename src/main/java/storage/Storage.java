@@ -35,48 +35,25 @@ public class Storage {
      */
     public TaskList loadTasksFromFile() {
         TaskList tasks = new TaskList();
+        File file = new File(filePath);
 
-        File file = null;
-        try {
-            file = new File(filePath);
+        if (!file.exists()) {
+            createEmptyFile(file);
+            return tasks;
+        }
 
-            if (!file.exists()) {
-                createEmptyFile(file);
-            } else {
-                System.out.println("Reading from: " + file.getAbsolutePath());
-
-                try (Scanner sc = new Scanner(new FileReader(file))) {
-                    while (sc.hasNextLine()) {
-                        try { // Parse line and add tasks into taskList
-                            String[] parts = sc.nextLine().split("\\|"); // split by "|"
-
-                            for (int i = 0; i < parts.length; i++) {
-                                parts[i] = parts[i].trim();
-                            }
-                            String taskType = parts[0].trim();
-                            boolean isDone = parts[1].trim().equals("1");
-                            switch (taskType) {
-                            case "T":
-                                tasks.createTodo(parts[2], isDone);
-                                break;
-                            case "D":
-                                tasks.createDeadline(parts[2], isDone, Parser.parseDateTime(parts[3]));
-                                break;
-                            case "E":
-                                tasks.createEvent(parts[2], isDone, parts[3], parts[4]);
-                                break;
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                            System.out.println("Error: missing information for the task");
-                        }
-                    }
-                } catch (IOException e) {
-                    System.err.println("Error reading file: " + e.getMessage());
+        try (Scanner sc = new Scanner(new FileReader(file))) {
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                try {
+                    Task task = Parser.parseTaskFromLine(line);
+                    tasks.add(task);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Skipping invalid task entry: " + e.getMessage());
                 }
             }
-        } catch (NullPointerException e) {
-            System.out.println("File not found, creating an empty file");
-            createEmptyFile(file);
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
         }
 
         return tasks;
@@ -97,7 +74,7 @@ public class Storage {
             }
             file.createNewFile(); // Create the empty file
         } catch (IOException e) {
-            System.err.println("An error occurred while creating the file: " + e.getMessage());
+            System.err.println("Error creating new empty file: " + e.getMessage());
         }
     }
 
@@ -119,7 +96,7 @@ public class Storage {
                 isFileEmpty = false; // Only add new line on the first write
             }
         } catch (IOException e) {
-            System.err.println("Error writing file: " + e.getMessage());
+            System.err.println("Error writing to file: " + e.getMessage());
         }
     }
 }

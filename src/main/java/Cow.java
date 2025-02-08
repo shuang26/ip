@@ -1,6 +1,9 @@
+import commands.Command;
+import commands.ExitCommand;
 import storage.Storage;
 import task.TaskList;
 import ui.Ui;
+import parser.Parser;
 
 import java.util.Scanner;
 
@@ -10,9 +13,9 @@ import java.util.Scanner;
  */
 
 public class Cow {
-    private final Storage storage;
-    private final TaskList tasks;
-    private final Ui ui;
+    private Storage storage;
+    private TaskList tasks;
+    private Ui ui;
 
     /**
      * Constructs a new Cow instance with the specified file path for task storage.
@@ -26,29 +29,34 @@ public class Cow {
         this.tasks = storage.loadTasksFromFile();
     }
 
+    public static void main(String[] args) {
+        new Cow("data/cow.txt").run();
+    }
+
     /**
      * Starts the application, shows the welcome message, and processes user input for task management.
      */
     public void run() {
         ui.showWelcome();
-        Scanner sc = new Scanner(System.in);
-
-        // boolean isExit = false;
-        while (sc.hasNextLine()) {
-            String input = sc.nextLine().trim();
-            if (input.isEmpty()) {
-                continue;
-            }
-            if (tasks.handleInput(input)) {
-                break;
-            }
-        }
-
+        runUntilExit();
         storage.saveTasksToFile(tasks);
-        sc.close();
+        ui.showExit();
     }
 
-    public static void main(String[] args) {
-        new Cow("data/cow.txt").run();
+    private void runUntilExit() {
+        Scanner sc = new Scanner(System.in);
+        Command command;
+
+        while (sc.hasNextLine()) {
+            String userInput = sc.nextLine().trim();
+            command = new Parser().parseCommand(userInput);
+
+            if (command instanceof ExitCommand) {
+                command.execute(this.tasks);
+                break;
+            }
+            command.execute(this.tasks);
+        }
+        sc.close();
     }
 }

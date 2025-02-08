@@ -48,7 +48,7 @@ class StorageTest {
 
     @Test
     void testSaveTasksToFile() {
-        taskList.createTodo("Exercise", false);
+        taskList.addTodo("Exercise", false);
         storage.saveTasksToFile(taskList);
 
         File file = new File(TEST_FILE_PATH);
