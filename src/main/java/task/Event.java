@@ -1,12 +1,15 @@
 package task;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Represents an event task, a subclass of Task.
  * An Event task contains a description, completion status, and start and end dates.
  */
 public class Event extends Task {
-    protected String fromDate;
-    protected String toDate;
+    protected LocalDateTime fromDate;
+    protected LocalDateTime toDate;
 
     /**
      * Constructs an Event task with the specified description, completion status,
@@ -17,10 +20,21 @@ public class Event extends Task {
      * @param fromDate    The starting date of the event.
      * @param toDate      The ending date of the event.
      */
-    public Event (String description, boolean isDone, String fromDate, String toDate) {
+    public Event (String description, boolean isDone, LocalDateTime fromDate, LocalDateTime toDate) {
         super(description, isDone);
         this.fromDate = fromDate;
         this.toDate = toDate;
+    }
+
+    /**
+     * Formats the given LocalDateTime into a human-readable string format.
+     *
+     * @param dateTime The LocalDateTime to format.
+     * @return A formatted string representing the date and time.
+     */
+    private String formatDateTime(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, h:mma");
+        return dateTime.format(formatter);
     }
 
     /**
@@ -29,7 +43,9 @@ public class Event extends Task {
      * @return A formatted string representing the event in storage format.
      */
     public String getFormat() {
-        return "E | " + super.getFormat() + " | " + fromDate + " | " + toDate;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy HHmm");
+        return "E | " + super.getFormat() + " | " + fromDate.format(formatter)
+            + " | " + toDate.format(formatter);
     }
 
     /**
@@ -40,6 +56,7 @@ public class Event extends Task {
      */
     @Override
     public String toString() {
-        return "[E]" + super.toString() + " (from: " + fromDate + " to: " + toDate + ")";
+        return "[E]" + super.toString() + " (from: " + formatDateTime(fromDate)
+            + " to: " + formatDateTime(toDate) + ")";
     }
 }

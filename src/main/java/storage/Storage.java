@@ -46,8 +46,7 @@ public class Storage {
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
                 try {
-                    Task task = Parser.parseTaskFromLine(line);
-                    tasks.add(task);
+                    tasks.addTask(Parser.parseTaskFromLine(line));
                 } catch (IllegalArgumentException e) {
                     System.err.println("Skipping invalid task entry: " + e.getMessage());
                 }

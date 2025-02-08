@@ -1,13 +1,9 @@
 package task;
 
-import parser.Parser;
-
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 /**
  * Manages a list of tasks and provides methods to handle user input.
@@ -23,75 +19,30 @@ public class TaskList {
         this.tasks = new ArrayList<>();
     }
 
-    /**
-     * Adds a new task to the task list based on the provided type and input.
-     *
-     * @param taskType The type of task (todo, deadline, event).
-     * @param isDone   The completion status of the task.
-     * @param input    The user input describing the task.
-     */
-    public void addNewTask(String taskType, boolean isDone, String input) {
-        Task task;
-
-        switch (taskType) {
-        case "todo":
-            task = addTodo(input, isDone);
-            break;
-        case "deadline":
-            try {
-                String[] parts = input.split("/by", 2);
-                LocalDateTime dateTime = Parser.parseDateTime(parts[1].trim());
-                task = addDeadline(parts[0].trim(), isDone, dateTime);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                printWithLine("Error: Please provide task description or a deadline for task.Deadline task.");
-                return;
-            } catch (DateTimeParseException e) {
-                printWithLine("Error: Please provide a valid deadline for task.Deadline task.");
-                return;
-            }
-            break;
-        case "event":
-            // TODO: Possible empty description / empty from date / empty to date
-            int fromIndex = input.indexOf("/from");
-            int toIndex = input.indexOf("/to");
-
-            if (fromIndex == -1 || toIndex == -1) {
-                printWithLine("Error: Please provide /from data or /to date for task.Event task");
-                return;
-            }
-            String description = input.substring(0, fromIndex).trim();
-            String fromDate = input.substring(fromIndex + 6, toIndex).trim(); // +6 to skip "/from "
-            String toDate = input.substring(toIndex + 4).trim(); // +4 to skip "/to "
-
-            task = addEvent(description, isDone, fromDate, toDate);
-            break;
-        default:
-            printWithLine("Error: Unknown task type. Please provide a valid task type (todo, deadline, event).");
-            return;
-        }
-
-        // Print after adding task
-        System.out.print(line + "Got it. I've added this task:\n");
-        System.out.println(task);
-        System.out.print("Now you have " + tasks.size() + " tasks in the list.\n" + line);
+    public void addTask(Task task) {
+        tasks.add(task);
     }
 
-    public Todo addTodo(String description, boolean isDone) {
+    public String addTodo(String description, boolean isDone) {
         Todo tmp = new Todo(description, isDone);
-        tasks.add(tmp);
-        return tmp;
+        return printAfterAdd(tmp);
     }
 
-    public Deadline addDeadline(String description, boolean isDone, LocalDateTime dateTime) {
+    public String addDeadline(String description, boolean isDone, LocalDateTime dateTime) {
         Deadline tmp = new Deadline(description, isDone, dateTime);
-        tasks.add(tmp);
-        return tmp;
+        return printAfterAdd(tmp);
     }
 
-    public Event addEvent(String description, boolean isDone, String fromDate, String toDate) {
+    public String addEvent(String description, boolean isDone,
+                           LocalDateTime fromDate, LocalDateTime toDate) {
         Event tmp = new Event(description, isDone, fromDate, toDate);
-        tasks.add(tmp);
-        return tmp;
+        return printAfterAdd(tmp);
+    }
+
+    public String printAfterAdd(Task task) {
+        return line + "Got it. I've added this task:\n" + task
+                + "Now you have " + tasks.size() + " tasks in the list.\n"
+                + line + "\n";
     }
 
     /**
@@ -139,8 +90,7 @@ public class TaskList {
     }
 
     public void findTask(String description) {
-        List<String> matches = IntStream.range(0, tasks.size())
-            .mapToObj(i -> tasks.get(i))
+        List<String> matches = tasks.stream()
             .filter(t -> t.getDescription().toLowerCase().contains(description.toLowerCase()))
             .map(t -> (tasks.indexOf(t) + 1) + "." + t)
             .toList();

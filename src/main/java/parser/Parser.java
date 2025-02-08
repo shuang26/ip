@@ -1,6 +1,15 @@
 package parser;
 
-import commands.*;
+import commands.AddCommand;
+import commands.Command;
+import commands.DeleteCommand;
+import commands.ExitCommand;
+import commands.FindCommand;
+import commands.IncorrectCommand;
+import commands.ListCommand;
+import commands.MarkCommand;
+import commands.UnknownCommand;
+import commands.UnmarkCommand;
 
 import task.Task;
 import task.Todo;
@@ -65,7 +74,7 @@ public class Parser {
             return new Deadline(parts[2], isDone, Parser.parseDateTime(parts[3]));
         case "E":
             if (parts.length < 5) throw new IllegalArgumentException("Missing event start/end: " + line);
-            return new Event(parts[2], isDone, parts[3], parts[4]);
+            return new Event(parts[2], isDone, Parser.parseDateTime(parts[3]), Parser.parseDateTime(parts[4]));
         default:
             throw new IllegalArgumentException("Unknown task type: " + taskType);
         }
@@ -90,7 +99,7 @@ public class Parser {
         case "find":
             return new FindCommand(arguments);
         case "delete":
-            return handleDelete(commandType, arguments);
+            return handleDelete(arguments);
         case "unmark":
         case "mark":
             return handleMarkUnMark(commandType, arguments);
@@ -108,7 +117,7 @@ public class Parser {
         try {
             i = Integer.parseInt(index) - 1;
         } catch (NumberFormatException e) {
-            return new IncorrectCommand("Please enter a valid index for " + commandType " request.");
+            return new IncorrectCommand("Please enter a valid index for " + commandType + " request.");
         }
 
         if (commandType.equals("mark")) {
@@ -118,7 +127,7 @@ public class Parser {
         }
     }
 
-    private Command handleDelete(String commandType, String index) {
+    private Command handleDelete(String index) {
         int i;
         try {
             i = Integer.parseInt(index) - 1;
@@ -128,9 +137,35 @@ public class Parser {
         return new DeleteCommand(i);
     }
 
-    private Command handleAdd(String commandType, String arguments) {
+    private Command handleAdd(String taskType, String arguments) {
+        if (arguments.isEmpty()) {
+            return new IncorrectCommand("Error: Please provide a description for "
+                + taskType + " task.");
+        }
 
+        if (taskType.equals("todo")) {
+            return new AddCommand(taskType, arguments, false);
+        } else if (taskType.equals("deadline")) {
+            String[] parts = arguments.split("/by", 2);
+            LocalDateTime deadline;
+            try {
+                deadline = Parser.parseDateTime(parts[1].trim());
+            } catch (DateTimeParseException e) {
+                return new IncorrectCommand("Error: Deadline format is yyyy-mm-dd HH:MM");
+            }
+            return new AddCommand(taskType, parts[0], false, deadline);
+        } else { // if (commandType.equals("event")) {
+            int fromIndex = arguments.indexOf("/from");
+            int toIndex = arguments.indexOf("/to");
 
-        return null;
+            if (fromIndex == -1 || toIndex == -1) {
+                return new IncorrectCommand("Error: Please provide /from data or /to date for Event task");
+            }
+
+            String description = arguments.substring(0, fromIndex).trim();
+            LocalDateTime fromDate = Parser.parseDateTime(arguments.substring(fromIndex + 6, toIndex).trim());
+            LocalDateTime toDate = Parser.parseDateTime(arguments.substring(toIndex + 4).trim());
+            return new AddCommand(taskType, description, false, fromDate, toDate);
+        }
     }
 }

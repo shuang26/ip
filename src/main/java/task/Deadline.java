@@ -9,18 +9,18 @@ import java.time.format.DateTimeFormatter;
  * and a date and time by which it should be completed.
  */
 public class Deadline extends Task {
-    protected LocalDateTime dateTime;
+    protected LocalDateTime deadline;
 
     /**
      * Constructs a Deadline task with the specified description, completion status, and deadline.
      *
      * @param description The description of the task.
      * @param isDone      The completion status of the task.
-     * @param dateTime    The deadline of the task.
+     * @param deadline    The deadline of the task.
      */
-    public Deadline(String description, boolean isDone, LocalDateTime dateTime) {
+    public Deadline(String description, boolean isDone, LocalDateTime deadline) {
         super(description, isDone);
-        this.dateTime = dateTime;
+        this.deadline = deadline;
     }
 
     /**
@@ -41,7 +41,7 @@ public class Deadline extends Task {
      */
     public String getFormat() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy HHmm");
-        return "D | " + super.getFormat() + " | " + dateTime.format(formatter);
+        return "D | " + super.getFormat() + " | " + deadline.format(formatter);
     }
 
     /**
@@ -52,6 +52,6 @@ public class Deadline extends Task {
      */
     @Override
     public String toString() {
-        return "[D]" + super.toString() + " (by: " + formatDateTime(dateTime) + ")";
+        return "[D]" + super.toString() + " (by: " + formatDateTime(deadline) + ")";
     }
 }
