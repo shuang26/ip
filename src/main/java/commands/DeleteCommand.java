@@ -2,6 +2,9 @@ package commands;
 
 import task.TaskList;
 
+/**
+ * Represents a command to delete a task from the task list.
+ */
 public class DeleteCommand extends Command {
     private int index;
 

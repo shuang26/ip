@@ -24,23 +24,12 @@ public class Deadline extends Task {
     }
 
     /**
-     * Formats the given LocalDateTime into a human-readable string format.
-     *
-     * @param dateTime The LocalDateTime to format.
-     * @return A formatted string representing the date and time.
-     */
-    private String formatDateTime(LocalDateTime dateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        return dateTime.format(formatter);
-    }
-
-    /**
      * Returns a formatted string representation of the task for storage purposes.
      *
      * @return A formatted string representing the task in storage format.
      */
     public String getFormat() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         return "D | " + super.getFormat() + " | " + deadline.format(formatter);
     }
 
@@ -52,6 +41,8 @@ public class Deadline extends Task {
      */
     @Override
     public String toString() {
-        return "[D]" + super.toString() + " (by: " + formatDateTime(deadline) + ")";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        return "[D]" + super.toString() + " (by: "
+                + deadline.format(formatter) + ")";
     }
 }

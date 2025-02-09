@@ -2,6 +2,9 @@ package commands;
 
 import task.TaskList;
 
+/**
+ * Represents the command that marks a task as completed in the task list.
+ */
 public class MarkCommand extends Command {
     private int index;
 

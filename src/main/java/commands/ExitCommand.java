@@ -2,6 +2,9 @@ package commands;
 
 import task.TaskList;
 
+/**
+ * Represents the command that exits the application.
+ */
 public class ExitCommand extends Command {
 
     @Override

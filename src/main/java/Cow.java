@@ -13,7 +13,6 @@ import java.util.Scanner;
  * Represents the main class of the Cow application that interacts with the user,
  * manages tasks, and handles storage.
  */
-
 public class Cow {
     private final Storage storage;
     private final TaskList tasks;

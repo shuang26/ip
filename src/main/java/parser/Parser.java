@@ -28,12 +28,13 @@ import java.time.format.DateTimeParseException;
  * into LocalDateTime objects.
  */
 public class Parser {
+
     /**
      * Parses a date-time string into a LocalDateTime object.
      *
-     * @param input the date-time string to be parsed.
-     * @return a LocalDateTime object representing the parsed date and time.
-     * @throws DateTimeParseException if the input string does not match the expected format.
+     * @param input The date-time string to be parsed.
+     * @return A LocalDateTime object representing the parsed date and time.
+     * @throws DateTimeParseException If the input string does not match the expected format.
      */
     public static LocalDateTime parseDateTime(String input) throws DateTimeParseException {
         input = input.replaceAll("[-/]", " ");
@@ -66,6 +67,13 @@ public class Parser {
         return LocalDateTime.of(date, time);
     }
 
+    /**
+     * Parses a task from a formatted string line.
+     *
+     * @param line The string representation of the task from storage.
+     * @return The corresponding Task object.
+     * @throws IllegalArgumentException If the format of the task line is invalid.
+     */
     public static Task parseTaskFromLine(String line) throws IllegalArgumentException {
         String[] parts = line.split("\\|");
 
@@ -144,6 +152,13 @@ public class Parser {
         }
     }
 
+    /**
+     * Handles marking or unmarking a task.
+     *
+     * @param commandType The type of command, either "mark" or "unmark".
+     * @param index_str   The index of the task to mark or unmark.
+     * @return A Command object to mark or unmark a task.
+     */
     private Command handleMarkUnMark(String commandType, String index_str) {
         int index;
         try {
@@ -159,6 +174,12 @@ public class Parser {
         }
     }
 
+    /**
+     * Handles the deletion of a task.
+     *
+     * @param index_str The index of the task to delete.
+     * @return A DeleteCommand object to delete a task.
+     */
     private Command handleDelete(String index_str) {
         int index;
         try {
@@ -169,6 +190,13 @@ public class Parser {
         return new DeleteCommand(index);
     }
 
+    /**
+     * Handles adding a new task.
+     *
+     * @param taskType  The type of task (todo, deadline, event).
+     * @param arguments The arguments containing the task details.
+     * @return A Command object for adding the task.
+     */
     private Command handleAdd(String taskType, String arguments) {
         if (arguments.isEmpty()) {
             return new IncorrectCommand("Error: Please provide a description for "
@@ -177,6 +205,7 @@ public class Parser {
 
         if (taskType.equals("todo")) {
             return new AddCommand(taskType, arguments, false);
+
         } else if (taskType.equals("deadline")) {
             String[] parts = arguments.split("/by", 2);
             if (parts.length < 2) {
@@ -190,6 +219,7 @@ public class Parser {
                 return new IncorrectCommand(e.getMessage());
             }
             return new AddCommand(taskType, parts[0], false, deadline);
+
         } else { // if (commandType.equals("event")) {
             int fromIndex = arguments.indexOf("/from");
             int toIndex = arguments.indexOf("/to");
@@ -205,6 +235,10 @@ public class Parser {
             try {
                 fromDate = Parser.parseDateTime(arguments.substring(fromIndex + 6, toIndex).trim());
                 toDate = Parser.parseDateTime(arguments.substring(toIndex + 4).trim());
+
+                if (toDate.isBefore(fromDate)) {
+                    return new IncorrectCommand("Error: /to date cannot be before /from date for Event task");
+                }
             } catch (DateTimeParseException e) {
                 return new IncorrectCommand(e.getMessage());
             }

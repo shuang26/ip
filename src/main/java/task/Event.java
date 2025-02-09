@@ -27,23 +27,12 @@ public class Event extends Task {
     }
 
     /**
-     * Formats the given LocalDateTime into a human-readable string format.
-     *
-     * @param dateTime The LocalDateTime to format.
-     * @return A formatted string representing the date and time.
-     */
-    private String formatDateTime(LocalDateTime dateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        return dateTime.format(formatter);
-    }
-
-    /**
      * Returns a formatted string representation of the event for storage purposes.
      *
      * @return A formatted string representing the event in storage format.
      */
     public String getFormat() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         return "E | " + super.getFormat() + " | " + fromDate.format(formatter)
                 + " | " + toDate.format(formatter);
     }
@@ -56,7 +45,8 @@ public class Event extends Task {
      */
     @Override
     public String toString() {
-        return "[E]" + super.toString() + " (from: " + formatDateTime(fromDate)
-                + " to: " + formatDateTime(toDate) + ")";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        return "[E]" + super.toString() + " (from: " + fromDate.format(formatter)
+                + " to: " + toDate.format(formatter) + ")";
     }
 }
