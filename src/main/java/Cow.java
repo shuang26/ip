@@ -1,13 +1,13 @@
-import commands.Command;
-import commands.ExitCommand;
-import commands.CommandResult;
+import java.util.Scanner;
 
+import commands.Command;
+import commands.CommandResult;
+import commands.ExitCommand;
+import parser.Parser;
 import storage.Storage;
 import task.TaskList;
 import ui.Ui;
-import parser.Parser;
 
-import java.util.Scanner;
 
 /**
  * Represents the main class of the Cow application that interacts with the user,

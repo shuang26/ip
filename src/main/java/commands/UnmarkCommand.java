@@ -2,6 +2,9 @@ package commands;
 
 import task.TaskList;
 
+/**
+ * Represents the command that unmarks a task as completed in the task list.
+ */
 public class UnmarkCommand extends Command {
     private int index;
 

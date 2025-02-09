@@ -9,7 +9,7 @@ import task.TaskList;
 public class FindCommand extends Command {
     private String description;
 
-    public FindCommand (String description) {
+    public FindCommand(String description) {
         this.description = description;
     }
 

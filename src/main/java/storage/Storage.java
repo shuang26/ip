@@ -1,16 +1,16 @@
 package storage;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+
 import parser.Parser;
 import task.Task;
 import task.TaskList;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.FileWriter;
-
-import java.util.Scanner;
 
 /**
  * Handles loading and saving tasks to a file for storage.

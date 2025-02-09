@@ -1,5 +1,11 @@
 package parser;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
 import commands.AddCommand;
 import commands.Command;
 import commands.DeleteCommand;
@@ -10,17 +16,10 @@ import commands.ListCommand;
 import commands.MarkCommand;
 import commands.UnknownCommand;
 import commands.UnmarkCommand;
-
-import task.Task;
-import task.Todo;
 import task.Deadline;
 import task.Event;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import task.Task;
+import task.Todo;
 
 /**
  * Utility class responsible for parsing commands and date-time inputs.
@@ -156,13 +155,13 @@ public class Parser {
      * Handles marking or unmarking a task.
      *
      * @param commandType The type of command, either "mark" or "unmark".
-     * @param index_str   The index of the task to mark or unmark.
+     * @param stringIndex   The index of the task to mark or unmark.
      * @return A Command object to mark or unmark a task.
      */
-    private Command handleMarkUnMark(String commandType, String index_str) {
+    private Command handleMarkUnMark(String commandType, String stringIndex) {
         int index;
         try {
-            index = Integer.parseInt(index_str) - 1;
+            index = Integer.parseInt(stringIndex) - 1;
         } catch (NumberFormatException e) {
             return new IncorrectCommand("Please enter a valid index for " + commandType + " request.");
         }
@@ -177,13 +176,13 @@ public class Parser {
     /**
      * Handles the deletion of a task.
      *
-     * @param index_str The index of the task to delete.
+     * @param stringIndex The index of the task to delete.
      * @return A DeleteCommand object to delete a task.
      */
-    private Command handleDelete(String index_str) {
+    private Command handleDelete(String stringIndex) {
         int index;
         try {
-            index = Integer.parseInt(index_str) - 1;
+            index = Integer.parseInt(stringIndex) - 1;
         } catch (NumberFormatException e) {
             return new IncorrectCommand("Please enter a valid index for delete request.");
         }
