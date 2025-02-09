@@ -18,7 +18,7 @@ public class MarkCommand extends Command {
         if (index < 0 || index >= tasks.size()) {
             return new CommandResult("Error: Index is out of bounds for mark request.");
         }
-        tasks.markTask(index);
-        return new CommandResult("");
+
+        return new CommandResult(tasks.markTask(index));
     }
 }

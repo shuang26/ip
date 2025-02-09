@@ -14,8 +14,7 @@ public class FindCommand extends Command {
         if (description.isEmpty()) {
             return new CommandResult("Error: Cannot find an empty description.");
         }
-        tasks.findTask(description);
 
-        return new CommandResult("");
+        return new CommandResult(tasks.findTask(description));
     }
 }

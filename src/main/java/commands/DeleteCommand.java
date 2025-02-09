@@ -19,7 +19,6 @@ public class DeleteCommand extends Command {
             return new CommandResult("Error: Index is out of bounds for delete request.");
         }
 
-        tasks.deleteTask(index);
-        return new CommandResult("");
+        return new CommandResult(tasks.deleteTask(index));
     }
 }

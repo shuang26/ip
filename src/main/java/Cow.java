@@ -1,5 +1,7 @@
 import commands.Command;
 import commands.ExitCommand;
+import commands.CommandResult;
+
 import storage.Storage;
 import task.TaskList;
 import ui.Ui;
@@ -29,12 +31,19 @@ public class Cow {
         this.tasks = storage.loadTasksFromFile();
     }
 
+    /**
+     * The main entry point of the application. Initializes a new instance of the Cow application
+     * with the specified file path, and starts running the application.
+     *
+     * @param args command-line arguments (not used in this case).
+     */
     public static void main(String[] args) {
         new Cow("data/cow.txt").run();
     }
 
     /**
      * Starts the application, shows the welcome message, and processes user input for task management.
+     * It continues to run until the user issues the exit command.
      */
     public void run() {
         ui.showWelcome();
@@ -43,6 +52,10 @@ public class Cow {
         ui.showExit();
     }
 
+    /**
+     * Continuously reads user input and processes commands until the user issues the exit command.
+     * Commands are parsed, executed, and the result is displayed to the user.
+     */
     private void runUntilExit() {
         Scanner sc = new Scanner(System.in);
         Command command;
@@ -55,7 +68,8 @@ public class Cow {
                 command.execute(this.tasks);
                 break;
             }
-            command.execute(this.tasks);
+            CommandResult output = command.execute(this.tasks);
+            System.out.print(output);
         }
         sc.close();
     }

@@ -13,5 +13,4 @@ public class IncorrectCommand extends Command {
     public CommandResult execute(TaskList tasks) {
         return new CommandResult(this.feedbackToUser);
     }
-
 }

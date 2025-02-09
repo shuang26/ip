@@ -20,7 +20,7 @@ public class Event extends Task {
      * @param fromDate    The starting date of the event.
      * @param toDate      The ending date of the event.
      */
-    public Event (String description, boolean isDone, LocalDateTime fromDate, LocalDateTime toDate) {
+    public Event(String description, boolean isDone, LocalDateTime fromDate, LocalDateTime toDate) {
         super(description, isDone);
         this.fromDate = fromDate;
         this.toDate = toDate;
@@ -33,7 +33,7 @@ public class Event extends Task {
      * @return A formatted string representing the date and time.
      */
     private String formatDateTime(LocalDateTime dateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, h:mma");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return dateTime.format(formatter);
     }
 
@@ -43,9 +43,9 @@ public class Event extends Task {
      * @return A formatted string representing the event in storage format.
      */
     public String getFormat() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy HHmm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return "E | " + super.getFormat() + " | " + fromDate.format(formatter)
-            + " | " + toDate.format(formatter);
+                + " | " + toDate.format(formatter);
     }
 
     /**
@@ -57,6 +57,6 @@ public class Event extends Task {
     @Override
     public String toString() {
         return "[E]" + super.toString() + " (from: " + formatDateTime(fromDate)
-            + " to: " + formatDateTime(toDate) + ")";
+                + " to: " + formatDateTime(toDate) + ")";
     }
 }

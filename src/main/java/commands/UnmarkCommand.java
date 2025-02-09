@@ -18,7 +18,7 @@ public class UnmarkCommand extends Command {
         if (index < 0 || index >= tasks.size()) {
             return new CommandResult("Error: index is out of bounds for unmark request.");
         }
-        tasks.unmarkTask(index);
-        return new CommandResult("");
+
+        return new CommandResult(tasks.unmarkTask(index));
     }
 }

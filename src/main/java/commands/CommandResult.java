@@ -10,4 +10,9 @@ public class CommandResult {
         this.commandOutput = commandOutput;
     }
 
+    @Override
+    public String toString() {
+        String line = "____________________________________________________________\n";
+        return line + commandOutput + "\n" + line;
+    }
 }

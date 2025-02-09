@@ -30,7 +30,7 @@ public class Deadline extends Task {
      * @return A formatted string representing the date and time.
      */
     private String formatDateTime(LocalDateTime dateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, h:mma");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return dateTime.format(formatter);
     }
 
@@ -40,7 +40,7 @@ public class Deadline extends Task {
      * @return A formatted string representing the task in storage format.
      */
     public String getFormat() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy HHmm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return "D | " + super.getFormat() + " | " + deadline.format(formatter);
     }
 

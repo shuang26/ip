@@ -25,83 +25,73 @@ public class TaskList {
 
     public String addTodo(String description, boolean isDone) {
         Todo tmp = new Todo(description, isDone);
+        addTask(tmp);
         return printAfterAdd(tmp);
     }
 
     public String addDeadline(String description, boolean isDone, LocalDateTime dateTime) {
         Deadline tmp = new Deadline(description, isDone, dateTime);
+        addTask(tmp);
         return printAfterAdd(tmp);
     }
 
     public String addEvent(String description, boolean isDone,
                            LocalDateTime fromDate, LocalDateTime toDate) {
         Event tmp = new Event(description, isDone, fromDate, toDate);
+        addTask(tmp);
         return printAfterAdd(tmp);
     }
 
     public String printAfterAdd(Task task) {
-        return line + "Got it. I've added this task:\n" + task
-                + "Now you have " + tasks.size() + " tasks in the list.\n"
-                + line + "\n";
+        return "Got it. I've added this task:\n"
+                + task + "\n"
+                + "Now you have " + tasks.size() + " tasks in the list.";
     }
 
-    /**
-     * Prints out all the tasks in the task list.
-     */
-    public void listAllTasks() {
-        System.out.print(line);
+    public String listAllTasks() {
+        StringBuilder result = new StringBuilder();
 
         if (tasks.isEmpty()) {
-            System.out.println("There is no task in your list. Please add some to see the list.");
+            result.append("There is no task in your list. Please add some to see the list.");
         } else {
-            System.out.println("Here are the tasks in your list:");
+            result.append("Here are the tasks in your list:\n");
             for (int i = 0; i < tasks.size(); i++) {
-                System.out.println((i + 1) + "." + tasks.get(i));
+                result.append((i + 1) + "." + tasks.get(i) + "\n");
             }
         }
 
-        System.out.print(line);
+        return result.toString();
     }
 
-    /**
-     * Deletes a task from the list by index.
-     *
-     * @param index The index of the task to delete.
-     */
-    public void deleteTask(int index) {
+
+    public String deleteTask(int index) {
         Task tmp = tasks.remove(index);
-        System.out.print(line + "Noted. I've removed this task:\n"
+        return "Noted. I've removed this task:\n"
                 + tmp + "\n"
-                + "Now you have " + tasks.size() + " tasks in the list.\n" + line);
+                + "Now you have " + tasks.size() + " tasks in the list.";
     }
 
-    public void markTask(int index) {
+    public String markTask(int index) {
         Task task = tasks.get(index);
         task.markDone();
-        System.out.print(line + "Nice! I've marked this task as done:\n"
-            + task + "\n" + line);
+        return "Nice! I've marked this task as done:\n" + task;
     }
 
-    public void unmarkTask(int index) {
+    public String unmarkTask(int index) {
         Task task = tasks.get(index);
         task.unmarkDone();
-        System.out.print(line + "OK, I've marked this task as not done yet:\n"
-            + task + "\n" + line);
+        return "OK, I've marked this task as not done yet:\n" + task;
     }
 
-    public void findTask(String description) {
+    public String findTask(String description) {
         List<String> matches = tasks.stream()
             .filter(t -> t.getDescription().toLowerCase().contains(description.toLowerCase()))
             .map(t -> (tasks.indexOf(t) + 1) + "." + t)
             .toList();
 
-        printWithLine(matches.isEmpty()
+        return matches.isEmpty()
             ? "No matching tasks found."
-            : "Here are the matching tasks:\n" + String.join("\n", matches));
-    }
-
-    private void printWithLine(String message) {
-        System.out.print(line + message + "\n" + line);
+            : "Here are the matching tasks:\n" + String.join("\n", matches);
     }
 
     public int size() {

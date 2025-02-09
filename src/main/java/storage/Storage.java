@@ -44,7 +44,8 @@ public class Storage {
 
         try (Scanner sc = new Scanner(new FileReader(file))) {
             while (sc.hasNextLine()) {
-                String line = sc.nextLine();
+                String line = sc.nextLine().trim();
+
                 try {
                     tasks.addTask(Parser.parseTaskFromLine(line));
                 } catch (IllegalArgumentException e) {

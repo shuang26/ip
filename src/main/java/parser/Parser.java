@@ -36,25 +36,39 @@ public class Parser {
      * @throws DateTimeParseException if the input string does not match the expected format.
      */
     public static LocalDateTime parseDateTime(String input) throws DateTimeParseException {
-        input = input.replaceAll("[-/]", " "); // Normalize separators
+        input = input.replaceAll("[-/]", " ");
         String[] parts = input.split("\\s+");
 
-        if (parts.length < 4) {
-            throw new DateTimeParseException("Invalid format", input, 0);
+        if (parts.length < 3) {
+            throw new DateTimeParseException("Invalid format. Expected: d/M/yyyy or dd/MM/yyyy [HH:mm]", input, 0);
         }
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d M yyyy");
-        LocalDate date = LocalDate.parse(parts[0] + " " + parts[1] + " " + parts[2], dateFormatter);
+        LocalDate date;
+        try {
+            date = LocalDate.parse(parts[0] + " " + parts[1] + " " + parts[2], dateFormatter);
+        } catch (DateTimeParseException e) {
+            throw new DateTimeParseException("Invalid date format.", input, 0);
+        }
 
-        // Parse time (supports "HHmm" format)
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmm");
-        LocalTime time = LocalTime.parse(parts[3], timeFormatter);
+        // Default time to 00:00 if not provided
+        LocalTime time = LocalTime.of(0, 0);
+        if (parts.length > 3) {
+            String timeInput = parts[3].replace(":", "");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmm");
 
+            try {
+                time = LocalTime.parse(timeInput, timeFormatter);
+            } catch (DateTimeParseException e) {
+                throw new DateTimeParseException("Invalid time format. Expected: HH:mm or HHmm", input, 0);
+            }
+        }
         return LocalDateTime.of(date, time);
     }
 
     public static Task parseTaskFromLine(String line) throws IllegalArgumentException {
         String[] parts = line.split("\\|");
+
         if (parts.length < 3) {
             throw new IllegalArgumentException("Unable to load this task: " + line);
         }
@@ -69,12 +83,30 @@ public class Parser {
         switch (taskType) {
         case "T":
             return new Todo(parts[2], isDone);
+
         case "D":
-            if (parts.length < 4) throw new IllegalArgumentException("Missing deadline date: " + line);
-            return new Deadline(parts[2], isDone, Parser.parseDateTime(parts[3]));
+            if (parts.length < 4) {
+                throw new IllegalArgumentException("Missing deadline date: " + line);
+            }
+            try {
+                LocalDateTime deadline = Parser.parseDateTime(parts[3]);
+                return new Deadline(parts[2], isDone, deadline);
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("Invalid deadline format: " + parts[3]);
+            }
+
         case "E":
-            if (parts.length < 5) throw new IllegalArgumentException("Missing event start/end: " + line);
-            return new Event(parts[2], isDone, Parser.parseDateTime(parts[3]), Parser.parseDateTime(parts[4]));
+            if (parts.length < 5) {
+                throw new IllegalArgumentException("Missing event start or end date: " + line);
+            }
+            try {
+                LocalDateTime fromDate = Parser.parseDateTime(parts[3]);
+                LocalDateTime toDate = Parser.parseDateTime(parts[4]);
+                return new Event(parts[2], isDone, fromDate, toDate);
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("Invalid event date format in line: " + line);
+            }
+
         default:
             throw new IllegalArgumentException("Unknown task type: " + taskType);
         }
@@ -112,29 +144,29 @@ public class Parser {
         }
     }
 
-    private Command handleMarkUnMark(String commandType, String index) {
-        int i;
+    private Command handleMarkUnMark(String commandType, String index_str) {
+        int index;
         try {
-            i = Integer.parseInt(index) - 1;
+            index = Integer.parseInt(index_str) - 1;
         } catch (NumberFormatException e) {
             return new IncorrectCommand("Please enter a valid index for " + commandType + " request.");
         }
 
         if (commandType.equals("mark")) {
-            return new MarkCommand(i);
+            return new MarkCommand(index);
         } else {
-            return new UnmarkCommand(i);
+            return new UnmarkCommand(index);
         }
     }
 
-    private Command handleDelete(String index) {
-        int i;
+    private Command handleDelete(String index_str) {
+        int index;
         try {
-            i = Integer.parseInt(index) - 1;
+            index = Integer.parseInt(index_str) - 1;
         } catch (NumberFormatException e) {
             return new IncorrectCommand("Please enter a valid index for delete request.");
         }
-        return new DeleteCommand(i);
+        return new DeleteCommand(index);
     }
 
     private Command handleAdd(String taskType, String arguments) {
@@ -147,11 +179,15 @@ public class Parser {
             return new AddCommand(taskType, arguments, false);
         } else if (taskType.equals("deadline")) {
             String[] parts = arguments.split("/by", 2);
+            if (parts.length < 2) {
+                return new IncorrectCommand("Error: Missing deadline. Format is: deadline <task> /by yyyy-MM-dd HH:mm");
+            }
+
             LocalDateTime deadline;
             try {
                 deadline = Parser.parseDateTime(parts[1].trim());
             } catch (DateTimeParseException e) {
-                return new IncorrectCommand("Error: Deadline format is yyyy-mm-dd HH:MM");
+                return new IncorrectCommand(e.getMessage());
             }
             return new AddCommand(taskType, parts[0], false, deadline);
         } else { // if (commandType.equals("event")) {
@@ -159,12 +195,20 @@ public class Parser {
             int toIndex = arguments.indexOf("/to");
 
             if (fromIndex == -1 || toIndex == -1) {
-                return new IncorrectCommand("Error: Please provide /from data or /to date for Event task");
+                return new IncorrectCommand("Please provide /from data and /to date for Event task");
             }
 
             String description = arguments.substring(0, fromIndex).trim();
-            LocalDateTime fromDate = Parser.parseDateTime(arguments.substring(fromIndex + 6, toIndex).trim());
-            LocalDateTime toDate = Parser.parseDateTime(arguments.substring(toIndex + 4).trim());
+            LocalDateTime fromDate;
+            LocalDateTime toDate;
+
+            try {
+                fromDate = Parser.parseDateTime(arguments.substring(fromIndex + 6, toIndex).trim());
+                toDate = Parser.parseDateTime(arguments.substring(toIndex + 4).trim());
+            } catch (DateTimeParseException e) {
+                return new IncorrectCommand(e.getMessage());
+            }
+
             return new AddCommand(taskType, description, false, fromDate, toDate);
         }
     }

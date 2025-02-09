@@ -6,7 +6,6 @@ public class ListCommand extends Command {
 
     @Override
     public CommandResult execute(TaskList tasks) {
-        tasks.listAllTasks();
-        return new CommandResult("");
+        return new CommandResult(tasks.listAllTasks());
     }
 }
