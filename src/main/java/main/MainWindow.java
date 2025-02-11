@@ -1,5 +1,6 @@
 package main;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -30,6 +31,10 @@ public class MainWindow extends AnchorPane {
     @FXML
     public void initialize() {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+
+        dialogContainer.getChildren().add(
+                DialogBox.getCowDialog("Hello! I'm Cow. How can I assist you today?", cowImage, "greeting")
+        );
     }
 
     /** Injects the Cow instance */
@@ -45,13 +50,15 @@ public class MainWindow extends AnchorPane {
     private void handleUserInput() {
         String input = userInput.getText();
         String response = cow.getResponse(input);
-        String commandType = "ADD";
-        // String commandType = cow.getCommandType();
-
+        String commandType = cow.getCommandType();
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input, userImage),
                 DialogBox.getCowDialog(response, cowImage, commandType)
         );
         userInput.clear();
+
+        if (commandType.equals("exit")) {
+            Platform.exit();
+        }
     }
 }
