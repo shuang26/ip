@@ -2,7 +2,6 @@ package main;
 
 import commands.Command;
 import commands.CommandResult;
-import commands.ExitCommand;
 import parser.Parser;
 import storage.Storage;
 import task.TaskList;
@@ -14,7 +13,7 @@ import task.TaskList;
 public class Cow {
     private final Storage storage;
     private final TaskList tasks;
-    private Command currentcommand;
+    private String commandType;
 
     /**
      * Constructs a new cow.Cow instance with the specified file path for task storage.
@@ -28,12 +27,14 @@ public class Cow {
     }
 
     public String getResponse(String input) {
-        this.currentcommand = new Parser().parseCommand(input.trim());
-        CommandResult output = currentcommand.execute(this.tasks);
+        Command command = new Parser().parseCommand(input.trim());
+        CommandResult output = command.execute(tasks, storage);
+        this.commandType = command.getType();
+
         return output.toString();
     }
 
     public String getCommandType() {
-        return this.currentcommand.getCommandType();
+        return commandType;
     }
 }

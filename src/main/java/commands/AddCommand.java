@@ -2,6 +2,7 @@ package commands;
 
 import java.time.LocalDateTime;
 
+import storage.Storage;
 import task.TaskList;
 
 /**
@@ -9,6 +10,7 @@ import task.TaskList;
  * It supports the addition of Todo, Deadline, and Event tasks in the TaskList.
  */
 public class AddCommand extends Command {
+    private final String commandType = "add";
     private String taskType;
     private String taskDescription;
     private boolean isDone;
@@ -64,7 +66,7 @@ public class AddCommand extends Command {
     }
 
     @Override
-    public CommandResult execute(TaskList tasks) {
+    public CommandResult execute(TaskList tasks, Storage storage) {
         if (taskType.equals("todo")) {
             return new CommandResult(tasks.addTodo(taskDescription, isDone));
         } else if (taskType.equals("deadline")) {
@@ -72,5 +74,9 @@ public class AddCommand extends Command {
         } else {
             return new CommandResult(tasks.addEvent(taskDescription, isDone, fromDate, toDate));
         }
+    }
+    @Override
+    public String getType() {
+        return commandType;
     }
 }

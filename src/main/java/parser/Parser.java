@@ -132,6 +132,8 @@ public class Parser {
 
         switch (commandType) {
         case "bye":
+        case "exit":
+        case "close":
             return new ExitCommand();
         case "list":
             return new ListCommand();
