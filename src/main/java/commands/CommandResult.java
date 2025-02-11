@@ -12,7 +12,6 @@ public class CommandResult {
 
     @Override
     public String toString() {
-        String line = "____________________________________________________________\n";
-        return line + commandOutput + "\n" + line;
+        return commandOutput;
     }
 }

@@ -1,5 +1,6 @@
 package commands;
 
+import storage.Storage;
 import task.TaskList;
 
 /**
@@ -16,7 +17,14 @@ public class Command {
      * @return The result of executing the command.
      * @throws UnsupportedOperationException if the command is not implemented.
      */
-    public CommandResult execute(TaskList tasks) {
+    public CommandResult execute(TaskList tasks, Storage storage) {
+        throw new UnsupportedOperationException("Not supported yet, only subclasses can call execute.");
+    }
+    /**
+     * Returns the command type.
+     * @throws UnsupportedOperationException if the command is not implemented.
+     */
+    public String getType() {
         throw new UnsupportedOperationException("Not supported yet, only subclasses can call execute.");
     }
 }
