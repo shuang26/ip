@@ -19,4 +19,13 @@ public class Command {
     public CommandResult execute(TaskList tasks) {
         throw new UnsupportedOperationException("Not supported yet, only subclasses can call execute.");
     }
+
+    /**
+     * Returns the command type.
+     *
+     * @throws UnsupportedOperationException if the command is not implemented.
+     */
+    public String getCommandType() {
+        throw new UnsupportedOperationException("Not supported yet, only subclasses can call execute.");
+    }
 }

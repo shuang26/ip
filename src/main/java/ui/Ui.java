@@ -1,7 +1,7 @@
 package ui;
 
 /**
- * Represents the user interface of the Cow application.
+ * Represents the user interface of the cow.Cow application.
  */
 public class Ui {
     private final String line = "____________________________________________________________\n";
@@ -10,7 +10,7 @@ public class Ui {
      * Displays a welcome message to the user.
      */
     public void showWelcome() {
-        System.out.print(line + "Hello! I'm Cow\nWhat can I do for you?\n" + line);
+        System.out.print(line + "Hello! I'm cow.Cow\nWhat can I do for you?\n" + line);
     }
 
     /**
