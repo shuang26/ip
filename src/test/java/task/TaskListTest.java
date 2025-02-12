@@ -31,7 +31,7 @@ class TaskListTest {
         String response = taskList.addDeadline("Submit report", false, deadline);
 
         assertEquals(1, taskList.size());
-        assertTrue(response.contains("[D][ ] Submit report (by: 2025-03-10 23:59)"));
+        assertTrue(response.contains("[D][ ] Submit report (Deadline is: 2025-03-10 23:59)"));
     }
 
     @Test

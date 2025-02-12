@@ -33,7 +33,7 @@ class DeadlineTest {
         LocalDateTime deadline = LocalDateTime.of(2025, 3, 10, 23, 59);
         Deadline deadlineTask = new Deadline("Submit Assignment", false, deadline);
 
-        String expectedString = "[D][ ] Submit Assignment (by: 2025-03-10 23:59)";
+        String expectedString = "[D][ ] Submit Assignment (Deadline is: 2025-03-10 23:59)";
         assertEquals(expectedString, deadlineTask.toString());
     }
 }

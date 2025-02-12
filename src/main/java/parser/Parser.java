@@ -22,7 +22,7 @@ import task.Task;
 import task.Todo;
 
 /**
- * Utility class responsible for parsing commands and date-time inputs.
+ * Utility class responsible for parsing user inputs into commands.
  * Provides methods for parsing user commands and converting date-time strings
  * into LocalDateTime objects.
  */
@@ -39,27 +39,16 @@ public class Parser {
         String commandType = parts[0].toLowerCase();
         String arguments = parts.length > 1 ? parts[1] : "";
 
-        switch (commandType) {
-        case "bye":
-        case "exit":
-        case "close":
-            return new ExitCommand();
-        case "list":
-            return new ListCommand();
-        case "find":
-            return new FindCommand(arguments);
-        case "delete":
-            return handleDelete(arguments);
-        case "unmark":
-        case "mark":
-            return handleMarkUnMark(commandType, arguments);
-        case "todo":
-        case "deadline":
-        case "event":
-            return handleAdd(commandType, arguments);
-        default: // TODO change to help command?
-            return new UnknownCommand("Sorry, I don't know what that means.");
-        }
+        return switch (commandType) {
+        case "bye", "exit", "close" -> new ExitCommand();
+        case "list" -> new ListCommand();
+        case "find" -> new FindCommand(arguments);
+        case "delete" -> handleDelete(arguments);
+        case "unmark", "mark" -> handleMarkUnMark(commandType, arguments);
+        case "todo", "deadline", "event" -> handleAdd(commandType, arguments);
+        // TODO change to help command?
+        default -> new UnknownCommand("Sorry, I don't know what that means.");
+        };
     }
 
     /**
@@ -167,17 +156,14 @@ public class Parser {
      * @return A Command object to mark or unmark a task.
      */
     private Command handleMarkUnMark(String commandType, String stringIndex) {
-        int index;
         try {
-            index = Integer.parseInt(stringIndex) - 1;
+            int index = Integer.parseInt(stringIndex) - 1;
+
+            return commandType.equals("mark")
+                ? new MarkCommand(index)
+                : new UnmarkCommand(index);
         } catch (NumberFormatException e) {
             return new IncorrectCommand("Please enter a valid index for " + commandType + " request.");
-        }
-
-        if (commandType.equals("mark")) {
-            return new MarkCommand(index);
-        } else {
-            return new UnmarkCommand(index);
         }
     }
 
@@ -188,13 +174,12 @@ public class Parser {
      * @return A DeleteCommand object to delete a task.
      */
     private Command handleDelete(String stringIndex) {
-        int index;
         try {
-            index = Integer.parseInt(stringIndex) - 1;
+            int index = Integer.parseInt(stringIndex) - 1;
+            return new DeleteCommand(index);
         } catch (NumberFormatException e) {
             return new IncorrectCommand("Please enter a valid index for delete request.");
         }
-        return new DeleteCommand(index);
     }
 
     /**
@@ -210,10 +195,10 @@ public class Parser {
                 + taskType + " task.");
         }
 
-        if (taskType.equals("todo")) {
+        switch (taskType) {
+        case "todo":
             return new AddCommand(taskType, arguments, false);
-
-        } else if (taskType.equals("deadline")) {
+        case "deadline":
             String[] parts = arguments.split("/by", 2);
             if (parts.length < 2) {
                 return new IncorrectCommand("Error: Missing deadline. Format is: deadline <task> /by yyyy-MM-dd HH:mm");
@@ -226,8 +211,7 @@ public class Parser {
                 return new IncorrectCommand(e.getMessage());
             }
             return new AddCommand(taskType, parts[0], false, deadline);
-
-        } else { // if (commandType.equals("event")) {
+        case "event":
             int fromIndex = arguments.indexOf("/from");
             int toIndex = arguments.indexOf("/to");
 
@@ -251,6 +235,8 @@ public class Parser {
             }
 
             return new AddCommand(taskType, description, false, fromDate, toDate);
+        default:
+            return new UnknownCommand("Unknown task type: " + taskType);
         }
     }
 
