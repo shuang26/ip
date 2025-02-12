@@ -27,6 +27,40 @@ import task.Todo;
  * into LocalDateTime objects.
  */
 public class Parser {
+    /**
+     * Parses user input into command for execution.
+     *
+     * @param userInput full user input string
+     * @return the command based on the user input
+     */
+    public Command parseCommand(String userInput) {
+        String[] parts = userInput.split(" ", 2);
+        trimArray(parts);
+        String commandType = parts[0].toLowerCase();
+        String arguments = parts.length > 1 ? parts[1] : "";
+
+        switch (commandType) {
+        case "bye":
+        case "exit":
+        case "close":
+            return new ExitCommand();
+        case "list":
+            return new ListCommand();
+        case "find":
+            return new FindCommand(arguments);
+        case "delete":
+            return handleDelete(arguments);
+        case "unmark":
+        case "mark":
+            return handleMarkUnMark(commandType, arguments);
+        case "todo":
+        case "deadline":
+        case "event":
+            return handleAdd(commandType, arguments);
+        default: // TODO change to help command?
+            return new UnknownCommand("Sorry, I don't know what that means.");
+        }
+    }
 
     /**
      * Parses a date-time string into a LocalDateTime object.
@@ -43,27 +77,32 @@ public class Parser {
             throw new DateTimeParseException("Invalid format. Expected: d/M/yyyy or dd/MM/yyyy [HH:mm]", input, 0);
         }
 
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d M yyyy");
-        LocalDate date;
-        try {
-            date = LocalDate.parse(parts[0] + " " + parts[1] + " " + parts[2], dateFormatter);
-        } catch (DateTimeParseException e) {
-            throw new DateTimeParseException("Invalid date format.", input, 0);
-        }
-
-        // Default time to 00:00 if not provided
-        LocalTime time = LocalTime.of(0, 0);
+        LocalDateTime dateTime = parseDate(parts);
         if (parts.length > 3) {
-            String timeInput = parts[3].replace(":", "");
-            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmm");
-
-            try {
-                time = LocalTime.parse(timeInput, timeFormatter);
-            } catch (DateTimeParseException e) {
-                throw new DateTimeParseException("Invalid time format. Expected: HH:mm or HHmm", input, 0);
-            }
+            LocalTime time = parseTime(parts[3]);
+            dateTime = LocalDateTime.of(dateTime.toLocalDate(), time);
         }
-        return LocalDateTime.of(date, time);
+        return dateTime;
+    }
+
+    // Split date and time parsing into two methods
+    private static LocalDateTime parseDate(String[] parts) throws DateTimeParseException {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d M yyyy");
+        try {
+            return LocalDate.parse(parts[0] + " " + parts[1] + " " + parts[2], dateFormatter).atStartOfDay();
+        } catch (DateTimeParseException e) {
+            throw new DateTimeParseException("Invalid date format.", String.join(" ", parts), 0);
+        }
+    }
+
+    private static LocalTime parseTime(String timeInput) throws DateTimeParseException {
+        timeInput = timeInput.replace(":", "");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmm");
+        try {
+            return LocalTime.parse(timeInput, timeFormatter);
+        } catch (DateTimeParseException e) {
+            throw new DateTimeParseException("Invalid time format. Expected: HH:mm or HHmm", timeInput, 0);
+        }
     }
 
     /**
@@ -75,14 +114,9 @@ public class Parser {
      */
     public static Task parseTaskFromLine(String line) throws IllegalArgumentException {
         String[] parts = line.split("\\|");
+        trimArray(parts);
 
-        if (parts.length < 3) {
-            throw new IllegalArgumentException("Unable to load this task: " + line);
-        }
-
-        for (int i = 0; i < parts.length; i++) {
-            parts[i] = parts[i].trim();
-        }
+        validateTaskParts(parts, line);
 
         String taskType = parts[0];
         boolean isDone = parts[1].equals("1");
@@ -119,37 +153,9 @@ public class Parser {
         }
     }
 
-    /**
-     * Parses user input into command for execution.
-     *
-     * @param userInput full user input string
-     * @return the command based on the user input
-     */
-    public Command parseCommand(String userInput) {
-        String[] parts = userInput.trim().split(" ", 2);
-        String commandType = parts[0].toLowerCase();
-        String arguments = parts.length > 1 ? parts[1] : "";
-
-        switch (commandType) {
-        case "bye":
-        case "exit":
-        case "close":
-            return new ExitCommand();
-        case "list":
-            return new ListCommand();
-        case "find":
-            return new FindCommand(arguments);
-        case "delete":
-            return handleDelete(arguments);
-        case "unmark":
-        case "mark":
-            return handleMarkUnMark(commandType, arguments);
-        case "todo":
-        case "deadline":
-        case "event":
-            return handleAdd(commandType, arguments);
-        default: // TODO change to help command?
-            return new UnknownCommand("Sorry, I don't know what that means.");
+    private static void validateTaskParts(String[] parts, String line) {
+        if (parts.length < 3) {
+            throw new IllegalArgumentException("Unable to load this task: " + line);
         }
     }
 
@@ -245,6 +251,19 @@ public class Parser {
             }
 
             return new AddCommand(taskType, description, false, fromDate, toDate);
+        }
+    }
+
+    /**
+     * Trims an array.
+     *
+     * @param array The array to be trimmed.
+     */
+    public static void trimArray(String[] array) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null) {
+                array[i] = array[i].trim();
+            }
         }
     }
 }

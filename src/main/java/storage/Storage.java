@@ -37,45 +37,18 @@ public class Storage {
         TaskList tasks = new TaskList();
         File file = new File(filePath);
 
-        if (!file.exists()) {
-            createEmptyFile(file);
-            return tasks;
-        }
+        ensureFileExists(file);
 
         try (Scanner sc = new Scanner(new FileReader(file))) {
             while (sc.hasNextLine()) {
                 String line = sc.nextLine().trim();
-
-                try {
-                    tasks.addTask(Parser.parseTaskFromLine(line));
-                } catch (IllegalArgumentException e) {
-                    System.err.println("Skipping invalid task entry: " + e.getMessage());
-                }
+                parseAndAddTask(line, tasks);
             }
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
         }
 
         return tasks;
-    }
-
-    /**
-     * Creates an empty file at the specified location.
-     * Ensures that the parent directory exists before creating the file.
-     *
-     * @param file The file to be created.
-     */
-    private void createEmptyFile(File file) {
-        try {
-            // Ensure the parent directory exists
-            File parentDir = file.getParentFile();
-            if (parentDir != null && !parentDir.exists()) {
-                parentDir.mkdirs();
-            }
-            file.createNewFile(); // Create the empty file
-        } catch (IOException e) {
-            System.err.println("Error creating new empty file: " + e.getMessage());
-        }
     }
 
     /**
@@ -97,6 +70,53 @@ public class Storage {
             }
         } catch (IOException e) {
             System.err.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Ensures that the file exists; if it does not, an empty file is created.
+     *
+     * @param file The file to check and create if necessary.
+     */
+    private void ensureFileExists(File file) {
+        if (!file.exists()) {
+            try {
+                createEmptyFile(file);
+            } catch (IOException e) {
+                System.err.println("Error creating empty file: " + e.getMessage());
+                throw new RuntimeException("Unable to create an empty file, program will terminate.");
+            }
+        }
+    }
+
+    /**
+     * Creates an empty file at the specified location.
+     * Ensures that the parent directory exists before creating the file.
+     *
+     * @param file The file to be created.
+     */
+    private void createEmptyFile(File file)throws IOException {
+        File parentDir = file.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
+        }
+
+        if (!file.createNewFile()) {
+            throw new IOException("Error creating empty file at: " + file.getAbsolutePath());
+        }
+    }
+
+    /**
+     * Parses a task from a line and adds it to the task list.
+     *
+     * @param line  The line to parse.
+     * @param tasks The task list to which the task will be added.
+     */
+    private void parseAndAddTask(String line, TaskList tasks) {
+        try {
+            tasks.addTask(Parser.parseTaskFromLine(line));
+        } catch (IllegalArgumentException e) {
+            System.err.println("Skipping invalid task entry: " + e.getMessage());
         }
     }
 }
