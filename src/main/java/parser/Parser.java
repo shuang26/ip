@@ -108,35 +108,20 @@ public class Parser {
 
         String taskType = parts[0];
         boolean isDone = parts[1].equals("1");
+        String description = parts[2];
 
         switch (taskType) {
         case "T":
-            return new Todo(parts[2], isDone);
-
+            return new Todo(description, isDone);
         case "D":
-            if (parts.length < 4) {
-                throw new IllegalArgumentException("Missing deadline date: " + line);
-            }
-            try {
-                LocalDateTime deadline = Parser.parseDateTime(parts[3]);
-                return new Deadline(parts[2], isDone, deadline);
-            } catch (DateTimeParseException e) {
-                throw new IllegalArgumentException("Invalid deadline format: " + parts[3]);
-            }
-
+            LocalDateTime deadline = Parser.parseDateTime(parts[3]);
+            return new Deadline(description, isDone, deadline);
         case "E":
-            if (parts.length < 5) {
-                throw new IllegalArgumentException("Missing event start or end date: " + line);
-            }
-            try {
-                LocalDateTime fromDate = Parser.parseDateTime(parts[3]);
-                LocalDateTime toDate = Parser.parseDateTime(parts[4]);
-                return new Event(parts[2], isDone, fromDate, toDate);
-            } catch (DateTimeParseException e) {
-                throw new IllegalArgumentException("Invalid event date format in line: " + line);
-            }
-
+            LocalDateTime fromDate = Parser.parseDateTime(parts[3]);
+            LocalDateTime toDate = Parser.parseDateTime(parts[4]);
+            return new Event(description, isDone, fromDate, toDate);
         default:
+            assert false : "Unknown task type in file: " + taskType;
             throw new IllegalArgumentException("Unknown task type: " + taskType);
         }
     }

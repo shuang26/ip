@@ -37,6 +37,8 @@ public class Storage {
         File file = new File(filePath);
 
         ensureFileExists(file);
+        assert file.exists() : "File should exist after ensureFileExists() call";
+        assert file.canRead() : "File should be readable";
 
         try (Scanner sc = new Scanner(new FileReader(file))) {
             while (sc.hasNextLine()) {
@@ -56,19 +58,28 @@ public class Storage {
      * @param tasks The TaskList to be saved.
      */
     public void saveTasksToFile(TaskList tasks) {
+        assert tasks != null : "TaskList should not be null when saving";
+        File file = new File(filePath);
+        assert file.exists() : "File should exist before writing";
+        assert file.canWrite() : "File should be writable";
+
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            boolean isFileEmpty = new java.io.File(filePath).length() == 0;
-
-            for (Task task : tasks.getAllTasks()) {
-                if (!isFileEmpty) {
-                    writer.newLine();
-                }
-
-                writer.write(task.getFormat());
-                isFileEmpty = false; // Only add new line on the first write
-            }
+            writeTasksToFile(tasks, writer);
         } catch (IOException e) {
             System.err.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    private void writeTasksToFile(TaskList tasks, BufferedWriter writer) throws IOException {
+        boolean isFileEmpty = new File(filePath).length() == 0;
+
+        for (Task task : tasks.getAllTasks()) {
+            assert task != null : "Task should not be null";
+            if (!isFileEmpty) {
+                writer.newLine();
+            }
+            writer.write(task.getFormat());
+            isFileEmpty = false;
         }
     }
 
@@ -86,6 +97,7 @@ public class Storage {
                 throw new RuntimeException("Unable to create an empty file, program will terminate.");
             }
         }
+        assert file.exists() : "File should exist after ensureFileExists()";
     }
 
     /**
@@ -94,7 +106,7 @@ public class Storage {
      *
      * @param file The file to be created.
      */
-    private void createEmptyFile(File file)throws IOException {
+    private void createEmptyFile(File file) throws IOException {
         File parentDir = file.getParentFile();
         if (parentDir != null && !parentDir.exists()) {
             parentDir.mkdirs();
@@ -103,6 +115,7 @@ public class Storage {
         if (!file.createNewFile()) {
             throw new IOException("Error creating empty file at: " + file.getAbsolutePath());
         }
+        assert file.exists() : "File should exist after createNewFile()";
     }
 
     /**
@@ -113,7 +126,9 @@ public class Storage {
      */
     private void parseAndAddTask(String line, TaskList tasks) {
         try {
-            tasks.addTask(Parser.parseTaskFromLine(line));
+            Task task = Parser.parseTaskFromLine(line);
+            assert task != null : "Parsed task should not be null";
+            tasks.addTask(task);
         } catch (IllegalArgumentException e) {
             System.err.println("Skipping invalid task entry: " + e.getMessage());
         }
