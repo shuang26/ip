@@ -21,7 +21,7 @@ public class AddCommand extends Command {
     /**
      * Creates an {@link AddCommand} for adding a Todo task.
      *
-     * @param taskType The type of the task (e.g., "todo", "deadline", "event").
+     * @param taskType The type of the task ("todo").
      * @param taskDescription A description of the task.
      * @param isDone A boolean indicating whether the task is marked as done.
      */
@@ -34,7 +34,7 @@ public class AddCommand extends Command {
     /**
      * Creates an {@link AddCommand} for adding a Deadline task.
      *
-     * @param taskType The type of the task (e.g., "todo", "deadline", "event").
+     * @param taskType The type of the task ("deadline").
      * @param taskDescription A description of the task.
      * @param isDone A boolean indicating whether the task is marked as done.
      * @param deadline The deadline date and time for the task.
@@ -50,7 +50,7 @@ public class AddCommand extends Command {
     /**
      * Creates an {@link AddCommand} for adding an Event task.
      *
-     * @param taskType The type of the task (e.g., "todo", "deadline", "event").
+     * @param taskType The type of the task ("event").
      * @param taskDescription A description of the task.
      * @param isDone A boolean indicating whether the task is marked as done.
      * @param fromDate The starting date and time for the event.
