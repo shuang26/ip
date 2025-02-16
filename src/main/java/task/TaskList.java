@@ -3,13 +3,14 @@ package task;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Manages a list of tasks and provides methods to handle user input.
  */
 public class TaskList {
     private final ArrayList<Task> tasks;
-    private final String line = "____________________________________________________________\n";
 
     /**
      * Constructs an empty TaskList.
@@ -98,7 +99,7 @@ public class TaskList {
                 if (i != 0) {
                     result.append("\n");
                 }
-                result.append((i + 1) + "." + tasks.get(i));
+                result.append((i + 1)).append(".").append(tasks.get(i));
             }
         }
 
@@ -149,14 +150,16 @@ public class TaskList {
      * @return A list of matching tasks or a message if none are found.
      */
     public String findTask(String description) {
-        List<String> matches = tasks.stream()
-            .filter(t -> t.getDescription().toLowerCase().contains(description.toLowerCase()))
-            .map(t -> (tasks.indexOf(t) + 1) + "." + t)
-            .toList();
+        final String query = description.toLowerCase();
 
-        return matches.isEmpty()
+        String result = IntStream.range(0, tasks.size())
+            .filter(i -> tasks.get(i).getDescription().toLowerCase().contains(query))
+            .mapToObj(i -> (i + 1) + "." + tasks.get(i))
+            .collect(Collectors.joining("\n"));
+
+        return result.isEmpty()
             ? "No matching tasks found."
-            : "Here are the matching tasks:\n" + String.join("\n", matches);
+            : "Here are the matching tasks:\n" + result;
     }
 
     /**
