@@ -113,7 +113,8 @@ public class Storage {
      */
     private void parseAndAddTask(String line, TaskList tasks) {
         try {
-            tasks.addTask(Parser.parseTaskFromLine(line));
+            Task task = Parser.parseTaskFromLine(line);
+            tasks.addTask(task);
         } catch (IllegalArgumentException e) {
             System.err.println("Skipping invalid task entry: " + e.getMessage());
         }
