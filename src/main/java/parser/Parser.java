@@ -44,10 +44,173 @@ public class Parser {
         case "list" -> handleList();
         case "find" -> handleFind(arguments);
         case "delete" -> handleDelete(arguments);
-        case "unmark", "mark" -> handleMarkUnMark(commandType, arguments);
+        case "unmark", "mark" -> handleMarkUnmark(commandType, arguments);
         case "todo", "deadline", "event" -> handleAdd(commandType, arguments);
         default -> handleUnknown(); // TODO change to help command?
         };
+    }
+
+    private Command handleExit() {
+        return new ExitCommand();
+    }
+
+    private Command handleList() {
+        return new ListCommand();
+    }
+
+    private Command handleFind(String arguments) {
+        return new FindCommand(arguments);
+    }
+
+    private Command handleDelete(String stringIndex) {
+        int index = parseIndex(stringIndex);
+        if (index == -1) {
+            return new IncorrectCommand("Please enter a valid index for delete request.");
+        }
+        return new DeleteCommand(index);
+    }
+
+    private Command handleMarkUnmark(String commandType, String stringIndex) {
+        int index = parseIndex(stringIndex);
+        if (index == -1) {
+            return new IncorrectCommand("Please enter a valid index for " + commandType + " request.");
+        }
+
+        if (commandType.equals("mark")) {
+            return new MarkCommand(index);
+        }
+        return new UnmarkCommand(index);
+    }
+
+    private Command handleAdd(String taskType, String arguments) {
+        if (arguments.isEmpty()) {
+            return new IncorrectCommand("Error: Please provide a description for " + taskType + " task.");
+        }
+
+        return switch (taskType) {
+        case "todo" -> handleTodo(arguments);
+        case "deadline" -> handleDeadline(arguments);
+        case "event" -> handleEvent(arguments);
+        // This line is not supposed to be reached
+        default -> throw new RuntimeException("Unknown task type - " + taskType);
+        };
+    }
+
+    private Command handleUnknown() {
+        return new UnknownCommand("Sorry, I don't know what that means.");
+    }
+
+    private Command handleTodo(String description) {
+        return new AddCommand("todo", description, false);
+    }
+
+    private Command handleDeadline(String arguments) {
+        String[] parts = arguments.split("/by", 2);
+        if (parts.length < 2) {
+            return new IncorrectCommand("Error: Missing deadline.\n"
+                + "Format for Deadline is : deadline <description> /by <deadline>");
+        }
+
+        String description = parts[0].trim();
+        LocalDateTime deadline;
+        try {
+            deadline = Parser.parseDateTime(parts[1].trim());
+        } catch (DateTimeParseException e) {
+            return new IncorrectCommand(e.getMessage());
+        }
+        return new AddCommand("deadline", description, false, deadline);
+    }
+
+    private Command handleEvent(String arguments) {
+        int fromIndex = arguments.indexOf("/from");
+        int toIndex = arguments.indexOf("/to");
+
+        if (!isValidEventFormat(fromIndex, toIndex)) {
+            return new IncorrectCommand("Error: Missing from date / to date.\n"
+                + "Format for Event is: event <description> /from <fromDate> /to <toDate>");
+        }
+
+        String description = parseDescription(arguments, fromIndex);
+        String fromString = parseDateString(arguments, fromIndex + 6, toIndex);
+        String toString = parseDateString(arguments, toIndex + 4, arguments.length());
+
+        if (fromString.isEmpty() || toString.isEmpty()) {
+            return new IncorrectCommand("Error: Missing from date / to date.\n"
+                + "Format for Event is: event <description> /from <fromDate> /to <toDate>");
+        }
+
+        return parseAndCreateEvent(description, fromString, toString);
+    }
+
+    private boolean isValidEventFormat(int fromIndex, int toIndex) {
+        return fromIndex != -1 && toIndex != -1;
+    }
+
+    private int parseIndex(String stringIndex) {
+        try {
+            return Integer.parseInt(stringIndex) - 1;
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    private String parseDescription(String arguments, int fromIndex) {
+        return arguments.substring(0, fromIndex).trim();
+    }
+
+    private String parseDateString(String arguments, int start, int end) {
+        if (start >= arguments.length()) {
+            return "";
+        }
+        return arguments.substring(start, end).trim();
+    }
+
+    private Command parseAndCreateEvent(String description, String fromString, String toString) {
+        try {
+            LocalDateTime fromDate = Parser.parseDateTime(fromString);
+            LocalDateTime toDate = Parser.parseDateTime(toString);
+
+            if (toDate.isBefore(fromDate)) {
+                return new IncorrectCommand("Error: /to date cannot be before /from date for Event task");
+            }
+            return new AddCommand("event", description, false, fromDate, toDate);
+        } catch (DateTimeParseException e) {
+            return new IncorrectCommand(e.getMessage());
+        }
+    }
+
+    /**
+     * Parses a task from a formatted string line.
+     *
+     * @param line The string representation of the task from storage.
+     * @return The corresponding Task object.
+     * @throws IllegalArgumentException If the format of the task line is invalid.
+     */
+    public static Task parseTaskFromLine(String line) throws IllegalArgumentException {
+        String[] parts = line.split("\\|");
+        trimArray(parts);
+
+        try {
+            String taskType = parts[0];
+            boolean isDone = parts[1].equals("1");
+            String description = parts[2];
+
+            switch (taskType) {
+            case "T":
+                return new Todo(description, isDone);
+            case "D":
+                LocalDateTime deadline = Parser.parseDateTime(parts[3]);
+                return new Deadline(description, isDone, deadline);
+            case "E":
+                LocalDateTime fromDate = Parser.parseDateTime(parts[3]);
+                LocalDateTime toDate = Parser.parseDateTime(parts[4]);
+                return new Event(description, isDone, fromDate, toDate);
+            default:
+                throw new IllegalArgumentException("Unknown task type: " + taskType);
+            }
+        } catch (ArrayIndexOutOfBoundsException | DateTimeParseException e) {
+            throw new IllegalArgumentException("Error parsing task from line, skipping: " + line);
+        }
     }
 
     /**
@@ -74,7 +237,6 @@ public class Parser {
         return dateTime;
     }
 
-
     private static LocalDateTime parseDate(String[] parts) throws DateTimeParseException {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d M yyyy");
         try {
@@ -94,166 +256,7 @@ public class Parser {
         }
     }
 
-    /**
-     * Parses a task from a formatted string line.
-     *
-     * @param line The string representation of the task from storage.
-     * @return The corresponding Task object.
-     * @throws IllegalArgumentException If the format of the task line is invalid.
-     */
-    public static Task parseTaskFromLine(String line) throws IllegalArgumentException {
-        String[] parts = line.split("\\|");
-        trimArray(parts);
-        validateTaskParts(parts, line);
-
-        String taskType = parts[0];
-        boolean isDone = parts[1].equals("1");
-
-        switch (taskType) {
-        case "T":
-            return new Todo(parts[2], isDone);
-
-        case "D":
-            if (parts.length < 4) {
-                throw new IllegalArgumentException("Missing deadline date: " + line);
-            }
-            try {
-                LocalDateTime deadline = Parser.parseDateTime(parts[3]);
-                return new Deadline(parts[2], isDone, deadline);
-            } catch (DateTimeParseException e) {
-                throw new IllegalArgumentException("Invalid deadline format: " + parts[3]);
-            }
-
-        case "E":
-            if (parts.length < 5) {
-                throw new IllegalArgumentException("Missing event start or end date: " + line);
-            }
-            try {
-                LocalDateTime fromDate = Parser.parseDateTime(parts[3]);
-                LocalDateTime toDate = Parser.parseDateTime(parts[4]);
-                return new Event(parts[2], isDone, fromDate, toDate);
-            } catch (DateTimeParseException e) {
-                throw new IllegalArgumentException("Invalid event date format in line: " + line);
-            }
-
-        default:
-            throw new IllegalArgumentException("Unknown task type: " + taskType);
-        }
-    }
-
-    private static void validateTaskParts(String[] parts, String line) {
-        if (parts.length < 3) {
-            throw new IllegalArgumentException("Unable to load this task: " + line);
-        }
-    }
-
-    /**
-     * Handles marking or unmarking a task.
-     *
-     * @param commandType The type of command, either "mark" or "unmark".
-     * @param stringIndex   The index of the task to mark or unmark.
-     * @return A Command object to mark or unmark a task.
-     */
-    private Command handleMarkUnMark(String commandType, String stringIndex) {
-        try {
-            int index = Integer.parseInt(stringIndex) - 1;
-
-            return commandType.equals("mark")
-                ? new MarkCommand(index)
-                : new UnmarkCommand(index);
-        } catch (NumberFormatException e) {
-            return new IncorrectCommand("Please enter a valid index for " + commandType + " request.");
-        }
-    }
-
-    private Command handleExit() {
-        return new ExitCommand();
-    }
-
-    private Command handleList() {
-        return new ListCommand();
-    }
-
-    private Command handleFind(String arguments) {
-        return new FindCommand(arguments);
-    }
-
-    private Command handleDelete(String stringIndex) {
-        try {
-            int index = Integer.parseInt(stringIndex) - 1;
-            return new DeleteCommand(index);
-        } catch (NumberFormatException e) {
-            return new IncorrectCommand("Please enter a valid index for delete request.");
-        }
-    }
-
-    private Command handleAdd(String taskType, String arguments) {
-        if (arguments.isEmpty()) {
-            return new IncorrectCommand("Error: Please provide a description for "
-                + taskType + " task.");
-        }
-
-        return switch (taskType) {
-        case "todo" -> new AddCommand(taskType, arguments, false);
-        case "deadline" -> handleDeadline(arguments);
-        case "event" -> handleEvent(arguments);
-        // This line is not supposed to be reached
-        default -> throw new RuntimeException("Unknown task type - " + taskType);
-        };
-    }
-
-    private Command handleDeadline(String arguments) {
-        String[] parts = arguments.split("/by", 2);
-        if (parts.length < 2) {
-            return new IncorrectCommand("Error: Missing deadline. "
-                + "Format is: deadline <task> /by yyyy-MM-dd HH:mm");
-        }
-
-        LocalDateTime deadline;
-        try {
-            deadline = Parser.parseDateTime(parts[1].trim());
-        } catch (DateTimeParseException e) {
-            return new IncorrectCommand(e.getMessage());
-        }
-        return new AddCommand("deadline", parts[0], false, deadline);
-    }
-
-    private Command handleEvent(String arguments) {
-        int fromIndex = arguments.indexOf("/from");
-        int toIndex = arguments.indexOf("/to");
-
-        if (fromIndex == -1 || toIndex == -1) {
-            return new IncorrectCommand("Please provide /from data and /to date for Event task");
-        }
-
-        String description = arguments.substring(0, fromIndex).trim();
-        LocalDateTime fromDate;
-        LocalDateTime toDate;
-
-        try {
-            fromDate = Parser.parseDateTime(arguments.substring(fromIndex + 6, toIndex).trim());
-            toDate = Parser.parseDateTime(arguments.substring(toIndex + 4).trim());
-
-            if (toDate.isBefore(fromDate)) {
-                return new IncorrectCommand("Error: /to date cannot be before /from date for Event task");
-            }
-        } catch (DateTimeParseException e) {
-            return new IncorrectCommand(e.getMessage());
-        }
-
-        return new AddCommand("event", description, false, fromDate, toDate);
-    }
-
-    private Command handleUnknown() {
-        return new UnknownCommand("Sorry, I don't know what that means.");
-    }
-
-    /**
-     * Trims an array.
-     *
-     * @param array The array to be trimmed.
-     */
-    public static void trimArray(String[] array) {
+    private static void trimArray(String[] array) {
         for (int i = 0; i < array.length; i++) {
             if (array[i] != null) {
                 array[i] = array[i].trim();
