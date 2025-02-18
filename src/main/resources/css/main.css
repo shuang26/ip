@@ -1,47 +1,56 @@
 .root {
-    main-color: rgb(237, 255, 242);       /* Create a looked-up color called "main-color" within root. */
-    -fx-background-color: main-color;
+    -fx-light-color: rgb(245, 245, 245);
+    -fx-dark-color: rgb(30, 30, 30);
+    -fx-primary-color: #2E8B57;
+    -fx-secondary-color: #FFC107;
+
+    /* Default Light Mode */
+    -fx-background-color: -fx-light-color;
+    -fx-text-fill: black;
 }
 
+.root.dark-mode {
+    -fx-background-color: -fx-dark-color;
+    -fx-text-fill: white;
+}
+
+/* Text Fields */
 .text-field {
-    -fx-background-color: #d9ffe2;
-    -fx-font: 20px "Arial";
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 5px;
+    -fx-padding: 8px;
+    -fx-font: 16px "Verdana";
 }
 
+.text-field:focused {
+    -fx-border-color: -fx-primary-color;
+}
+
+/* Buttons */
 .button {
-    -fx-background-color: mediumspringgreen;
-    -fx-font: italic bold 16px "Arial";
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 15px;
+    -fx-border-radius: 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 5, 0, 2, 2);
 }
 
 .button:hover {
-    -fx-background-color:cyan;
-    -fx-font-size: 18px;
+    -fx-background-color: derive(-fx-primary-color, -15%);
 }
 
 .button:pressed {
-    -fx-background-color:orange;
-    -fx-font-size: 20px;
+    -fx-background-color: derive(-fx-primary-color, -35%);
 }
 
-.scroll-pane,
-.scroll-pane .viewport {
+/* Scroll Bar */
+.scroll-pane, .scroll-pane .viewport {
     -fx-background-color: transparent;
 }
 
-.scroll-bar {
-    -fx-font-size: 10px;  /* Change width of scroll bar. */
-    -fx-background-color: main-color;
-}
-
 .scroll-bar .thumb {
-    -fx-background-color: #ff9cb4;
-    -fx-background-radius: 1em;
+    -fx-background-color: -fx-secondary-color;
+    -fx-background-radius: 5px;
 }
-
-/* Hides the increment and decrement buttons. */
-.scroll-bar .increment-button,
-.scroll-bar .decrement-button {
-    -fx-pref-height: 0;
-    -fx-opacity: 0;
-}
-
